@@ -1,0 +1,6 @@
+@ArticleManagementAPI_HostAddress = http://localhost:5058
+
+GET {{ArticleManagementAPI_HostAddress}}/
+Accept: application/json
+
+###
