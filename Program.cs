@@ -1,4 +1,6 @@
 using ArticleManagementAPI.Data;
+using ArticleManagementAPI.Repositories;
+using ArticleManagementAPI.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -32,6 +34,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 
 var app = builder.Build();
 
