@@ -1,4 +1,6 @@
-﻿using ArticleManagementAPI.DTOs.Auth;
+﻿using ArticleManagementAPI.Common;
+using ArticleManagementAPI.DTOs.Auth;
+using ArticleManagementAPI.Enums;
 using ArticleManagementAPI.Models;
 using ArticleManagementAPI.Repositories.Interfaces;
 using ArticleManagementAPI.Services.Interfaces;
@@ -16,13 +18,13 @@ namespace ArticleManagementAPI.Services
 			_authRepository = authRepository;
 		}
 
-		public async Task<bool> RegisterAsync(RegisterDto dto)
+		public async Task<Result> RegisterAsync(RegisterDto dto)
 		{
 			if (await _authRepository.EmailExistsAsync(dto.Email))
-				return false;
+				return Result.Failure(ErrorType.Conflict, "Email already exists");
 
 			if (await _authRepository.NameExistsAsync(dto.Name))
-				return false;
+				return Result.Failure(ErrorType.Conflict, "Name already exists");
 
 			var user = new User
 			{
@@ -34,7 +36,7 @@ namespace ArticleManagementAPI.Services
 
 			await _authRepository.AddUserAsync(user);
 			
-			return true;
+			return Result.Success();
 		}
 	}
 }

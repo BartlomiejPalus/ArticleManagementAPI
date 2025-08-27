@@ -1,4 +1,5 @@
-﻿using ArticleManagementAPI.DTOs.Auth;
+﻿using ArticleManagementAPI.Common;
+using ArticleManagementAPI.DTOs.Auth;
 using ArticleManagementAPI.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,10 +19,12 @@ namespace ArticleManagementAPI.Controllers
 		[HttpPost("register")]
 		public async Task<IActionResult> Register([FromBody] RegisterDto dto)
 		{
-			if (await _authService.RegisterAsync(dto))
+			Result result = await _authService.RegisterAsync(dto);
+
+			if (result.IsSuccess)
 				return Ok(new { message = "User registered successfully" });
-			else
-				return BadRequest("Email or name exists");
+
+			return Conflict(result.ErrorMessage);
 		}
 	}
 }

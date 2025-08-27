@@ -1,9 +1,10 @@
-﻿using ArticleManagementAPI.DTOs.Auth;
+﻿using ArticleManagementAPI.Common;
+using ArticleManagementAPI.DTOs.Auth;
 
 namespace ArticleManagementAPI.Services.Interfaces
 {
 	public interface IAuthService
 	{
-		Task<bool> RegisterAsync(RegisterDto dto);
+		Task<Result> RegisterAsync(RegisterDto dto);
 	}
 }
