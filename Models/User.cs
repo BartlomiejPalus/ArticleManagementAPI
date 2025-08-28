@@ -13,5 +13,6 @@ namespace ArticleManagementAPI.Models
 		public ICollection<Article> Articles { get; set; } = [];
 		public ICollection<Comment> Comments { get; set; } = [];
 		public ICollection<Review> Reviews { get; set; } = [];
+		public ICollection<RefreshToken> RefreshToken { get; set; } = [];
 	}
 }
