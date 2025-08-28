@@ -7,5 +7,6 @@ namespace ArticleManagementAPI.Repositories.Interfaces
 		Task AddUserAsync(User user);
 		Task<bool> EmailExistsAsync(string email);
 		Task<bool> NameExistsAsync(string name);
+		Task<User?> GetUserByEmailAsync(string email);
 	}
 }

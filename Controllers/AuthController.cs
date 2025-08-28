@@ -1,6 +1,8 @@
 ﻿using ArticleManagementAPI.Common;
 using ArticleManagementAPI.DTOs.Auth;
+using ArticleManagementAPI.Enums;
 using ArticleManagementAPI.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ArticleManagementAPI.Controllers
@@ -25,6 +27,24 @@ namespace ArticleManagementAPI.Controllers
 				return Ok(new { message = "User registered successfully" });
 
 			return Conflict(result.ErrorMessage);
+		}
+
+		[HttpPost("login")]
+		public async Task<IActionResult> Login([FromBody] LoginDto dto)
+		{
+			Result<string> result = await _authService.LoginAsync(dto);
+
+			if (result.IsSuccess)
+			{
+				return Ok(new { message = "Login successful", token = result.Value });
+			}
+
+			return result.ErrorType switch
+			{
+				ErrorType.NotFound => NotFound(result.ErrorMessage),
+				ErrorType.Unauthorized => Unauthorized(result.ErrorMessage),
+				_ => BadRequest(result.ErrorMessage)
+			};
 		}
 	}
 }

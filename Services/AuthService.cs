@@ -10,12 +10,14 @@ namespace ArticleManagementAPI.Services
 {
 	public class AuthService : IAuthService
 	{
-		public readonly IAuthRepository _authRepository;
+		private readonly IAuthRepository _authRepository;
+		private readonly IJwtService _jwtService;
 		private readonly PasswordHasher<User> _passwordHasher = new();
 
-		public AuthService(IAuthRepository authRepository)
+		public AuthService(IAuthRepository authRepository, IJwtService jwtService)
 		{
 			_authRepository = authRepository;
+			_jwtService = jwtService;
 		}
 
 		public async Task<Result> RegisterAsync(RegisterDto dto)
@@ -37,6 +39,23 @@ namespace ArticleManagementAPI.Services
 			await _authRepository.AddUserAsync(user);
 			
 			return Result.Success();
+		}
+
+		public async Task<Result<string>> LoginAsync(LoginDto dto)
+		{
+			var user = await _authRepository.GetUserByEmailAsync(dto.email);
+
+			if (user == null)
+				return Result<string>.Failure(ErrorType.Unauthorized, "Invalid credentials");
+
+			var result = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, dto.password);
+
+			if (result == PasswordVerificationResult.Failed)
+				return Result<string>.Failure(ErrorType.Unauthorized, "Invalid credentials");
+
+			string token = _jwtService.GenerateToken(user);
+
+			return Result<string>.Success(token);
 		}
 	}
 }
