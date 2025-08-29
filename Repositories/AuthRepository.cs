@@ -34,5 +34,11 @@ namespace ArticleManagementAPI.Repositories
 		{
 			return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
 		}
+
+		public async Task AddRefreshTokenAsync(RefreshToken refreshToken)
+		{
+			_context.RefreshTokens.Add(refreshToken);
+			await _context.SaveChangesAsync();
+		}
 	}
 }

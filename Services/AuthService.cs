@@ -12,12 +12,15 @@ namespace ArticleManagementAPI.Services
 	{
 		private readonly IAuthRepository _authRepository;
 		private readonly IJwtService _jwtService;
+		private readonly IConfiguration _configuration;
 		private readonly PasswordHasher<User> _passwordHasher = new();
 
-		public AuthService(IAuthRepository authRepository, IJwtService jwtService)
+		public AuthService(IAuthRepository authRepository, IJwtService jwtService,
+			IConfiguration configuration)
 		{
 			_authRepository = authRepository;
 			_jwtService = jwtService;
+			_configuration = configuration;
 		}
 
 		public async Task<Result> RegisterAsync(RegisterDto dto)
@@ -41,21 +44,39 @@ namespace ArticleManagementAPI.Services
 			return Result.Success();
 		}
 
-		public async Task<Result<string>> LoginAsync(LoginDto dto)
+		public async Task<Result<LoginResultDto>> LoginAsync(LoginDto dto)
 		{
 			var user = await _authRepository.GetUserByEmailAsync(dto.email);
 
 			if (user == null)
-				return Result<string>.Failure(ErrorType.Unauthorized, "Invalid credentials");
+				return Result<LoginResultDto>.Failure(ErrorType.Unauthorized, "Invalid credentials");
 
 			var result = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, dto.password);
 
 			if (result == PasswordVerificationResult.Failed)
-				return Result<string>.Failure(ErrorType.Unauthorized, "Invalid credentials");
+				return Result<LoginResultDto>.Failure(ErrorType.Unauthorized, "Invalid credentials");
 
-			string token = _jwtService.GenerateToken(user);
+			string accessToken = _jwtService.GenerateAccessToken(user);
 
-			return Result<string>.Success(token);
+			string refreshTokenValue = _jwtService.GenerateRefreshToken();
+			string refreshTokenHash = _jwtService.HashToken(refreshTokenValue);
+
+			var refreshToken = new RefreshToken
+			{
+				Token = refreshTokenHash,
+				UserId = user.Id,
+				ExpiresAt = DateTime.UtcNow.AddDays(_configuration.GetValue<int>("Jwt:RefreshTokenExpirationInDays"))
+			};
+
+			await _authRepository.AddRefreshTokenAsync(refreshToken);
+
+			var resultDto = new LoginResultDto
+			{
+				AccessToken = accessToken,
+				RefreshToken = refreshTokenValue
+			};
+
+			return Result<LoginResultDto>.Success(resultDto);
 		}
 	}
 }

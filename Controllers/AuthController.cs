@@ -32,11 +32,16 @@ namespace ArticleManagementAPI.Controllers
 		[HttpPost("login")]
 		public async Task<IActionResult> Login([FromBody] LoginDto dto)
 		{
-			Result<string> result = await _authService.LoginAsync(dto);
+			Result<LoginResultDto> result = await _authService.LoginAsync(dto);
 
 			if (result.IsSuccess)
 			{
-				return Ok(new { message = "Login successful", token = result.Value });
+				return Ok(new
+				{
+					message = "Login successful",
+					result.Value.AccessToken,
+					result.Value.RefreshToken
+				});
 			}
 
 			return result.ErrorType switch
