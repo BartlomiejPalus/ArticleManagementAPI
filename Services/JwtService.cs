@@ -3,6 +3,7 @@ using ArticleManagementAPI.Services.Interfaces;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace ArticleManagementAPI.Services
@@ -16,7 +17,7 @@ namespace ArticleManagementAPI.Services
 			_configuration = configuration;
 		}
 
-		public string GenerateToken(User user)
+		public string GenerateAccessToken(User user)
 		{
 			string secretKey = _configuration["Jwt:Secret"]!;
 			var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
@@ -41,6 +42,18 @@ namespace ArticleManagementAPI.Services
 			var token = handler.CreateToken(tokenDescriptor);
 
 			return handler.WriteToken(token);
+		}
+
+		public string GenerateRefreshToken()
+		{
+			return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+		}
+
+		public string HashToken(string token)
+		{
+			byte[] bytes = Encoding.UTF8.GetBytes(token);
+			byte[] hash = SHA256.HashData(bytes);
+			return Convert.ToBase64String(hash);
 		}
 	}
 }
