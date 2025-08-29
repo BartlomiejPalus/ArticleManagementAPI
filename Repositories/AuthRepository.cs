@@ -60,5 +60,18 @@ namespace ArticleManagementAPI.Repositories
 
 			await _context.SaveChangesAsync();
 		}
+
+		public async Task<bool> RemoveRefreshTokenAsync(string refreshToken)
+		{
+			var token = await _context.RefreshTokens.FirstOrDefaultAsync(rt => rt.Token == refreshToken);
+
+			if(token == null)
+				return false;
+			
+			_context.RefreshTokens.Remove(token);
+			await _context.SaveChangesAsync();
+
+			return true;
+		}
 	}
 }

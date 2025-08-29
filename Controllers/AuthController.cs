@@ -54,7 +54,7 @@ namespace ArticleManagementAPI.Controllers
 		[HttpPost("refresh")]
 		public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenDto dto)
 		{
-			Result<AuthTokensDto> result = await _authService.RefreshToken(dto);
+			Result<AuthTokensDto> result = await _authService.RefreshTokenAsync(dto);
 
 			if (result.IsSuccess)
 			{
@@ -64,6 +64,18 @@ namespace ArticleManagementAPI.Controllers
 					result.Value.RefreshToken
 				});
 			}
+
+			return Unauthorized(result.ErrorMessage);
+		}
+
+		[Authorize]
+		[HttpPost("logout")]
+		public async Task<IActionResult> Logout(RefreshTokenDto dto)
+		{
+			var result = await _authService.LogoutAsync(dto);
+
+			if (result.IsSuccess)
+				return NoContent();
 
 			return Unauthorized(result.ErrorMessage);
 		}

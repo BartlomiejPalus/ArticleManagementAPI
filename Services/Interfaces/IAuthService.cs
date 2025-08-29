@@ -7,6 +7,7 @@ namespace ArticleManagementAPI.Services.Interfaces
 	{
 		Task<Result> RegisterAsync(RegisterDto dto);
 		Task<Result<AuthTokensDto>> LoginAsync(LoginDto dto);
-		Task<Result<AuthTokensDto>> RefreshToken(RefreshTokenDto dto);
+		Task<Result<AuthTokensDto>> RefreshTokenAsync(RefreshTokenDto dto);
+		Task<Result> LogoutAsync(RefreshTokenDto dto);
 	}
 }

@@ -79,7 +79,7 @@ namespace ArticleManagementAPI.Services
 			return Result<AuthTokensDto>.Success(authTokensDto);
 		}
 
-		public async Task<Result<AuthTokensDto>> RefreshToken(RefreshTokenDto dto)
+		public async Task<Result<AuthTokensDto>> RefreshTokenAsync(RefreshTokenDto dto)
 		{
 			var refreshTokenHash = _jwtService.HashToken(dto.RefreshToken);
 			var user = await _authRepository.GetUserByRefreshTokenAsync(refreshTokenHash);
@@ -106,6 +106,16 @@ namespace ArticleManagementAPI.Services
 			};
 
 			return Result<AuthTokensDto>.Success(authTokensDto);
+		}
+
+		public async Task<Result> LogoutAsync(RefreshTokenDto dto)
+		{
+			var refreshTokenHash = _jwtService.HashToken(dto.RefreshToken);
+
+			if (await _authRepository.RemoveRefreshTokenAsync(refreshTokenHash))
+				return Result.Success();
+
+			return Result.Failure(ErrorType.Unauthorized, "Invalid refresh token");
 		}
 	}
 }
