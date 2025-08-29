@@ -32,13 +32,12 @@ namespace ArticleManagementAPI.Controllers
 		[HttpPost("login")]
 		public async Task<IActionResult> Login([FromBody] LoginDto dto)
 		{
-			Result<LoginResultDto> result = await _authService.LoginAsync(dto);
+			Result<AuthTokensDto> result = await _authService.LoginAsync(dto);
 
 			if (result.IsSuccess)
 			{
 				return Ok(new
 				{
-					message = "Login successful",
 					result.Value.AccessToken,
 					result.Value.RefreshToken
 				});
@@ -50,6 +49,23 @@ namespace ArticleManagementAPI.Controllers
 				ErrorType.Unauthorized => Unauthorized(result.ErrorMessage),
 				_ => BadRequest(result.ErrorMessage)
 			};
+		}
+
+		[HttpPost("refresh")]
+		public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenDto dto)
+		{
+			Result<AuthTokensDto> result = await _authService.RefreshToken(dto);
+
+			if (result.IsSuccess)
+			{
+				return Ok(new
+				{
+					result.Value.AccessToken,
+					result.Value.RefreshToken
+				});
+			}
+
+			return Unauthorized(result.ErrorMessage);
 		}
 	}
 }

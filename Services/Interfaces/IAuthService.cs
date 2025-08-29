@@ -6,6 +6,7 @@ namespace ArticleManagementAPI.Services.Interfaces
 	public interface IAuthService
 	{
 		Task<Result> RegisterAsync(RegisterDto dto);
-		Task<Result<LoginResultDto>> LoginAsync(LoginDto dto);
+		Task<Result<AuthTokensDto>> LoginAsync(LoginDto dto);
+		Task<Result<AuthTokensDto>> RefreshToken(RefreshTokenDto dto);
 	}
 }

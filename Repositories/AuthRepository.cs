@@ -40,5 +40,25 @@ namespace ArticleManagementAPI.Repositories
 			_context.RefreshTokens.Add(refreshToken);
 			await _context.SaveChangesAsync();
 		}
+
+		public async Task<User?> GetUserByRefreshTokenAsync(string refreshTokenHash)
+		{
+			return await _context.RefreshTokens
+				.Where(rt => rt.Token == refreshTokenHash && rt.ExpiresAt > DateTime.UtcNow)
+				.Select(rt => rt.User)
+				.FirstOrDefaultAsync();
+		}
+
+		public async Task UpdateRefreshTokenAsync(string oldRefreshTokenHash, RefreshToken newRefreshToken)
+		{
+			var record = await _context.RefreshTokens
+				.Where(rf => rf.Token == oldRefreshTokenHash)
+				.FirstAsync();
+			record.Token = newRefreshToken.Token;
+			record.ExpiresAt = newRefreshToken.ExpiresAt;
+			record.CreatedAt = newRefreshToken.CreatedAt;
+
+			await _context.SaveChangesAsync();
+		}
 	}
 }

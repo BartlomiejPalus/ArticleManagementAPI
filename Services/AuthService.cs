@@ -44,17 +44,17 @@ namespace ArticleManagementAPI.Services
 			return Result.Success();
 		}
 
-		public async Task<Result<LoginResultDto>> LoginAsync(LoginDto dto)
+		public async Task<Result<AuthTokensDto>> LoginAsync(LoginDto dto)
 		{
 			var user = await _authRepository.GetUserByEmailAsync(dto.email);
 
 			if (user == null)
-				return Result<LoginResultDto>.Failure(ErrorType.Unauthorized, "Invalid credentials");
+				return Result<AuthTokensDto>.Failure(ErrorType.Unauthorized, "Invalid credentials");
 
 			var result = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, dto.password);
 
 			if (result == PasswordVerificationResult.Failed)
-				return Result<LoginResultDto>.Failure(ErrorType.Unauthorized, "Invalid credentials");
+				return Result<AuthTokensDto>.Failure(ErrorType.Unauthorized, "Invalid credentials");
 
 			string accessToken = _jwtService.GenerateAccessToken(user);
 
@@ -70,13 +70,42 @@ namespace ArticleManagementAPI.Services
 
 			await _authRepository.AddRefreshTokenAsync(refreshToken);
 
-			var resultDto = new LoginResultDto
+			var authTokensDto = new AuthTokensDto
 			{
 				AccessToken = accessToken,
 				RefreshToken = refreshTokenValue
 			};
 
-			return Result<LoginResultDto>.Success(resultDto);
+			return Result<AuthTokensDto>.Success(authTokensDto);
+		}
+
+		public async Task<Result<AuthTokensDto>> RefreshToken(RefreshTokenDto dto)
+		{
+			var refreshTokenHash = _jwtService.HashToken(dto.RefreshToken);
+			var user = await _authRepository.GetUserByRefreshTokenAsync(refreshTokenHash);
+			
+			if (user == null)
+				return Result<AuthTokensDto>.Failure(ErrorType.Unauthorized, "Invalid refresh token");
+			
+			var accessToken = _jwtService.GenerateAccessToken(user);
+			var refreshTokenValue = _jwtService.GenerateRefreshToken();
+
+			var refreshToken = new RefreshToken
+			{
+				Token = _jwtService.HashToken(refreshTokenValue),
+				UserId = user.Id,
+				ExpiresAt = DateTime.UtcNow.AddDays(_configuration.GetValue<int>("Jwt:RefreshTokenExpirationInDays"))
+			};
+
+			await _authRepository.UpdateRefreshTokenAsync(refreshTokenHash, refreshToken);
+
+			var authTokensDto = new AuthTokensDto
+			{
+				AccessToken = accessToken,
+				RefreshToken = refreshTokenValue
+			};
+
+			return Result<AuthTokensDto>.Success(authTokensDto);
 		}
 	}
 }

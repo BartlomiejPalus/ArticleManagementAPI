@@ -9,5 +9,7 @@ namespace ArticleManagementAPI.Repositories.Interfaces
 		Task<bool> NameExistsAsync(string name);
 		Task<User?> GetUserByEmailAsync(string email);
 		Task AddRefreshTokenAsync(RefreshToken refreshToken);
+		Task<User?> GetUserByRefreshTokenAsync(string refreshTokenHash);
+		Task UpdateRefreshTokenAsync(string oldRefreshTokenHash, RefreshToken newRefreshToken);
 	}
 }
