@@ -39,7 +39,8 @@ namespace ArticleManagementAPI.Services
 
 			user.PasswordHash = _passwordHasher.HashPassword(user, dto.Password);
 
-			await _authRepository.AddUserAsync(user);
+			if (!await _authRepository.AddUserAsync(user))
+				return Result.Failure(ErrorType.InternalServerError, "Failed to create user");
 			
 			return Result.Success();
 		}
@@ -68,7 +69,8 @@ namespace ArticleManagementAPI.Services
 				ExpiresAt = DateTime.UtcNow.AddDays(_configuration.GetValue<int>("Jwt:RefreshTokenExpirationInDays"))
 			};
 
-			await _authRepository.AddRefreshTokenAsync(refreshToken);
+			if (!await _authRepository.AddRefreshTokenAsync(refreshToken))
+				return Result<AuthTokensDto>.Failure(ErrorType.InternalServerError, "Failed to save refresh token");
 
 			var authTokensDto = new AuthTokensDto
 			{
@@ -97,7 +99,8 @@ namespace ArticleManagementAPI.Services
 				ExpiresAt = DateTime.UtcNow.AddDays(_configuration.GetValue<int>("Jwt:RefreshTokenExpirationInDays"))
 			};
 
-			await _authRepository.UpdateRefreshTokenAsync(refreshTokenHash, refreshToken);
+			if (!await _authRepository.UpdateRefreshTokenAsync(refreshTokenHash, refreshToken))
+				return Result<AuthTokensDto>.Failure(ErrorType.InternalServerError, "Failed to update refresh token");
 
 			var authTokensDto = new AuthTokensDto
 			{

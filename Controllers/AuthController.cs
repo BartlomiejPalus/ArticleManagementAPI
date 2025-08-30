@@ -24,9 +24,13 @@ namespace ArticleManagementAPI.Controllers
 			Result result = await _authService.RegisterAsync(dto);
 
 			if (result.IsSuccess)
-				return Ok(new { message = "User registered successfully" });
+				return Ok("User registered successfully");
 
-			return Conflict(result.ErrorMessage);
+			return result.ErrorType switch
+			{
+				ErrorType.Conflict => Conflict(result.ErrorMessage),
+				_ => StatusCode(500, "Internal server error")
+			};
 		}
 
 		[HttpPost("login")]
@@ -47,7 +51,7 @@ namespace ArticleManagementAPI.Controllers
 			{
 				ErrorType.NotFound => NotFound(result.ErrorMessage),
 				ErrorType.Unauthorized => Unauthorized(result.ErrorMessage),
-				_ => BadRequest(result.ErrorMessage)
+				_ => StatusCode(500, "Internal server error")
 			};
 		}
 
@@ -65,7 +69,11 @@ namespace ArticleManagementAPI.Controllers
 				});
 			}
 
-			return Unauthorized(result.ErrorMessage);
+			return result.ErrorType switch
+			{
+				ErrorType.Unauthorized => Unauthorized(result.ErrorMessage),
+				_ => StatusCode(500, "Internal server error")
+			};
 		}
 
 		[Authorize]

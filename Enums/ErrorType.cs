@@ -5,6 +5,7 @@
 		None,
 		NotFound,
 		Unauthorized,
-		Conflict
+		Conflict,
+		InternalServerError
 	}
 }

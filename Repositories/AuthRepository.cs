@@ -24,10 +24,10 @@ namespace ArticleManagementAPI.Repositories
 			return await _context.Users.AnyAsync(u => u.Name == name);
 		}
 
-		public async Task AddUserAsync(User user)
+		public async Task<bool> AddUserAsync(User user)
 		{
 			_context.Users.Add(user);
-			await _context.SaveChangesAsync();
+			return await _context.SaveChangesAsync() > 0;
 		}
 
 		public async Task<User?> GetUserByEmailAsync(string email)
@@ -35,10 +35,10 @@ namespace ArticleManagementAPI.Repositories
 			return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
 		}
 
-		public async Task AddRefreshTokenAsync(RefreshToken refreshToken)
+		public async Task<bool> AddRefreshTokenAsync(RefreshToken refreshToken)
 		{
 			_context.RefreshTokens.Add(refreshToken);
-			await _context.SaveChangesAsync();
+			return await _context.SaveChangesAsync() > 0;
 		}
 
 		public async Task<User?> GetUserByRefreshTokenAsync(string refreshTokenHash)
@@ -49,16 +49,20 @@ namespace ArticleManagementAPI.Repositories
 				.FirstOrDefaultAsync();
 		}
 
-		public async Task UpdateRefreshTokenAsync(string oldRefreshTokenHash, RefreshToken newRefreshToken)
+		public async Task<bool> UpdateRefreshTokenAsync(string oldRefreshTokenHash, RefreshToken newRefreshToken)
 		{
 			var record = await _context.RefreshTokens
 				.Where(rf => rf.Token == oldRefreshTokenHash)
-				.FirstAsync();
+				.FirstOrDefaultAsync();
+
+			if (record == null)
+				return false;
+
 			record.Token = newRefreshToken.Token;
 			record.ExpiresAt = newRefreshToken.ExpiresAt;
 			record.CreatedAt = newRefreshToken.CreatedAt;
 
-			await _context.SaveChangesAsync();
+			return await _context.SaveChangesAsync() > 0;
 		}
 
 		public async Task<bool> RemoveRefreshTokenAsync(string refreshToken)
