@@ -73,9 +73,7 @@ namespace ArticleManagementAPI.Repositories
 				return false;
 			
 			_context.RefreshTokens.Remove(token);
-			await _context.SaveChangesAsync();
-
-			return true;
+			return await _context.SaveChangesAsync() > 0;
 		}
 	}
 }

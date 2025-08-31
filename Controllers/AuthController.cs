@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ArticleManagementAPI.Controllers
 {
-	[Route("api/[controller]")]
+	[Route("api/auth")]
 	[ApiController]
 	public class AuthController : ControllerBase
 	{
@@ -39,13 +39,7 @@ namespace ArticleManagementAPI.Controllers
 			Result<AuthTokensDto> result = await _authService.LoginAsync(dto);
 
 			if (result.IsSuccess)
-			{
-				return Ok(new
-				{
-					result.Value.AccessToken,
-					result.Value.RefreshToken
-				});
-			}
+				return Ok(result.Value);
 
 			return result.ErrorType switch
 			{
@@ -61,13 +55,7 @@ namespace ArticleManagementAPI.Controllers
 			Result<AuthTokensDto> result = await _authService.RefreshTokenAsync(dto);
 
 			if (result.IsSuccess)
-			{
-				return Ok(new
-				{
-					result.Value.AccessToken,
-					result.Value.RefreshToken
-				});
-			}
+				return Ok(result.Value);
 
 			return result.ErrorType switch
 			{
