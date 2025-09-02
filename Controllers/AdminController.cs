@@ -30,7 +30,24 @@ namespace ArticleManagementAPI.Controllers
 			{
 				ErrorType.NotFound => NotFound(result.ErrorMessage),
 				ErrorType.Conflict => Conflict(result.ErrorMessage),
+				ErrorType.InternalServerError => StatusCode(500, result.ErrorMessage),
 				_ => StatusCode(500, "Internal server error")
+			};
+		}
+
+		[HttpDelete("users/{userId}")]
+		public async Task<IActionResult> RemoveUser([FromRoute] Guid userId)
+		{
+			var result = await _adminService.RemoveUser(userId);
+
+			if (result.IsSuccess) 
+				return NoContent();
+
+			return result.ErrorType switch
+			{
+				ErrorType.NotFound => NotFound(result.ErrorMessage),
+				ErrorType.InternalServerError => StatusCode(500, result.ErrorMessage),
+				_ => StatusCode(500, "Unexpected error")
 			};
 		}
 	}

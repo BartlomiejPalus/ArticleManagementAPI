@@ -19,5 +19,10 @@ namespace ArticleManagementAPI.Services
 		{
 			return await _adminRepository.ChangeUserRoleAsync(userId, dto.Role);
 		}
+
+		public async Task<Result> RemoveUser(Guid userId)
+		{
+			return await _adminRepository.RemoveUserAsync(userId);
+		}
 	}
 }

@@ -26,8 +26,24 @@ namespace ArticleManagementAPI.Repositories
 				return Result.Failure(ErrorType.Conflict, "User already has this role");
 
 			user.Role = newRole;
+
 			if (await _context.SaveChangesAsync() == 0)
 				return Result.Failure(ErrorType.InternalServerError, "Failed to change user role");
+
+			return Result.Success();
+		}
+
+		public async Task<Result> RemoveUserAsync(Guid userId)
+		{
+			var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
+			if (user == null)
+				return Result.Failure(ErrorType.NotFound, "User not found");
+
+			_context.Users.Remove(user);
+
+			if (await _context.SaveChangesAsync() == 0)
+				return Result.Failure(ErrorType.InternalServerError, "Failed to remove user");
 
 			return Result.Success();
 		}
