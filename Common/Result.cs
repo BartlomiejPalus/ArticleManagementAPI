@@ -48,6 +48,7 @@ namespace ArticleManagementAPI.Common
 				ErrorType.BadRequest => controller.BadRequest(result.ErrorMessage),
 				ErrorType.Unauthorized => controller.Unauthorized(result.ErrorMessage),
 				ErrorType.NotFound => controller.NotFound(result.ErrorMessage),
+				ErrorType.Conflict => controller.Conflict(result.ErrorMessage),
 				ErrorType.InternalServerError => controller.StatusCode(500, result.ErrorMessage),
 				_ => controller.StatusCode(500, "Unexpected error")
 			};
