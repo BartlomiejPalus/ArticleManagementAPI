@@ -13,46 +13,25 @@ namespace ArticleManagementAPI.Services
 		private readonly IAuthRepository _authRepository;
 		private readonly IJwtService _jwtService;
 		private readonly IConfiguration _configuration;
-		private readonly PasswordHasher<User> _passwordHasher = new();
+		private readonly IPasswordHasher<User> _passwordHasher;
 
 		public AuthService(IAuthRepository authRepository, IJwtService jwtService,
-			IConfiguration configuration)
+			IConfiguration configuration, IPasswordHasher<User> passwordHasher)
 		{
 			_authRepository = authRepository;
 			_jwtService = jwtService;
 			_configuration = configuration;
-		}
-
-		public async Task<Result> RegisterAsync(RegisterDto dto)
-		{
-			if (await _authRepository.EmailExistsAsync(dto.Email))
-				return Result.Failure(ErrorType.Conflict, "Email already exists");
-
-			if (await _authRepository.NameExistsAsync(dto.Name))
-				return Result.Failure(ErrorType.Conflict, "Name already exists");
-
-			var user = new User
-			{
-				Name = dto.Name,
-				Email = dto.Email
-			};
-
-			user.PasswordHash = _passwordHasher.HashPassword(user, dto.Password);
-
-			if (!await _authRepository.AddUserAsync(user))
-				return Result.Failure(ErrorType.InternalServerError, "Failed to create user");
-			
-			return Result.Success();
+			_passwordHasher = passwordHasher;
 		}
 
 		public async Task<Result<AuthTokensDto>> LoginAsync(LoginDto dto)
 		{
-			var user = await _authRepository.GetUserByEmailAsync(dto.email);
+			var user = await _authRepository.GetUserByEmailAsync(dto.Email);
 
 			if (user == null)
 				return Result<AuthTokensDto>.Failure(ErrorType.Unauthorized, "Invalid credentials");
 
-			var result = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, dto.password);
+			var result = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, dto.Password);
 
 			if (result == PasswordVerificationResult.Failed)
 				return Result<AuthTokensDto>.Failure(ErrorType.Unauthorized, "Invalid credentials");

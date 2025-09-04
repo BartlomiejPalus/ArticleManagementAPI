@@ -14,22 +14,6 @@ namespace ArticleManagementAPI.Repositories
 			_context = context;
 		}
 
-		public async Task<bool> EmailExistsAsync(string email)
-		{
-			return await _context.Users.AnyAsync(u => u.Email == email);
-		}
-
-		public async Task<bool> NameExistsAsync(string name)
-		{
-			return await _context.Users.AnyAsync(u => u.Name == name);
-		}
-
-		public async Task<bool> AddUserAsync(User user)
-		{
-			_context.Users.Add(user);
-			return await _context.SaveChangesAsync() > 0;
-		}
-
 		public async Task<User?> GetUserByEmailAsync(string email)
 		{
 			return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);

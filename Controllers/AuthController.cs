@@ -1,6 +1,5 @@
 ﻿using ArticleManagementAPI.Common;
 using ArticleManagementAPI.DTOs.Auth;
-using ArticleManagementAPI.Enums;
 using ArticleManagementAPI.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,21 +17,6 @@ namespace ArticleManagementAPI.Controllers
 			_authService = authService;
 		}
 
-		[HttpPost("register")]
-		public async Task<IActionResult> Register([FromBody] RegisterDto dto)
-		{
-			Result result = await _authService.RegisterAsync(dto);
-
-			if (result.IsSuccess)
-				return Ok("User registered successfully");
-
-			return result.ErrorType switch
-			{
-				ErrorType.Conflict => Conflict(result.ErrorMessage),
-				_ => StatusCode(500, "Internal server error")
-			};
-		}
-
 		[HttpPost("login")]
 		public async Task<IActionResult> Login([FromBody] LoginDto dto)
 		{
@@ -41,12 +25,7 @@ namespace ArticleManagementAPI.Controllers
 			if (result.IsSuccess)
 				return Ok(result.Value);
 
-			return result.ErrorType switch
-			{
-				ErrorType.NotFound => NotFound(result.ErrorMessage),
-				ErrorType.Unauthorized => Unauthorized(result.ErrorMessage),
-				_ => StatusCode(500, "Internal server error")
-			};
+			return result.ToErrorActionResult(this);
 		}
 
 		[HttpPost("refresh")]
@@ -57,11 +36,7 @@ namespace ArticleManagementAPI.Controllers
 			if (result.IsSuccess)
 				return Ok(result.Value);
 
-			return result.ErrorType switch
-			{
-				ErrorType.Unauthorized => Unauthorized(result.ErrorMessage),
-				_ => StatusCode(500, "Internal server error")
-			};
+			return result.ToErrorActionResult(this);
 		}
 
 		[Authorize]
@@ -73,7 +48,7 @@ namespace ArticleManagementAPI.Controllers
 			if (result.IsSuccess)
 				return NoContent();
 
-			return Unauthorized(result.ErrorMessage);
+			return result.ToErrorActionResult(this);
 		}
 	}
 }

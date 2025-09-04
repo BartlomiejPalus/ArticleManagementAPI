@@ -17,6 +17,20 @@ namespace ArticleManagementAPI.Controllers
 			_userService = userService;
 		}
 
+		[HttpPost("register")]
+		public async Task<IActionResult> Register([FromBody] RegisterDto dto)
+		{
+			var result = await _userService.RegisterUserAsync(dto);
+
+			if (result.IsSuccess)
+			{
+				var userDto = result.Value;
+				return CreatedAtAction(nameof(GetUserById), new { userId = userDto.Id }, userDto);
+			}
+
+			return result.ToErrorActionResult(this);
+		}
+
 		[HttpPatch("{userId}/role")]
 		[Authorize(Roles = "Admin")]
 		public async Task<IActionResult> ChangeUserRole([FromRoute] Guid userId, [FromBody] ChangeRoleDto dto)

@@ -1,18 +1,52 @@
 ﻿using ArticleManagementAPI.Common;
 using ArticleManagementAPI.DTOs.User;
 using ArticleManagementAPI.Enums;
+using ArticleManagementAPI.Models;
 using ArticleManagementAPI.Repositories.Interfaces;
 using ArticleManagementAPI.Services.Interfaces;
+using Microsoft.AspNetCore.Identity;
 
 namespace ArticleManagementAPI.Services
 {
 	public class UserService : IUserService
 	{
 		private readonly IUserRepository _userRepository;
+		private readonly IPasswordHasher<User> _passwordHasher;
 
-		public UserService(IUserRepository userRepository)
+		public UserService(IUserRepository userRepository, IPasswordHasher<User> passwordHasher)
 		{
 			_userRepository = userRepository;
+			_passwordHasher = passwordHasher;
+		}
+
+		public async Task<Result<RegisterResponseDto>> RegisterUserAsync(RegisterDto dto)
+		{
+			var nameExists = await _userRepository.NameExistsAsync(dto.Name);
+			var emailExists = await _userRepository.EmailExistsAsync(dto.Email);
+
+			if (nameExists || emailExists)
+				return Result<RegisterResponseDto>.Failure(ErrorType.Conflict, "Name or email is already taken");
+
+			var newUser = new User
+			{
+				Name = dto.Name,
+				Email = dto.Email
+			};
+
+			newUser.PasswordHash = _passwordHasher.HashPassword(newUser, dto.Password);
+
+			await _userRepository.AddUserAsync(newUser);
+
+			await _userRepository.SaveChangesAsync();
+
+			var userDto = new RegisterResponseDto
+			{
+				Id = newUser.Id,
+				Name = newUser.Name,
+				Email = newUser.Email,
+			};
+
+			return Result<RegisterResponseDto>.Success(userDto);
 		}
 
 		public async Task<Result> ChangeUserRoleAsync(Guid userId, ChangeRoleDto dto)

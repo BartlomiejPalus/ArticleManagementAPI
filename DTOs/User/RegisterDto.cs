@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace ArticleManagementAPI.DTOs.Auth
+namespace ArticleManagementAPI.DTOs.User
 {
 	public class RegisterDto
 	{
