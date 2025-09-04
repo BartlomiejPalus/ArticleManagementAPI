@@ -66,7 +66,7 @@ namespace ArticleManagementAPI.Controllers
 
 		[Authorize]
 		[HttpPost("logout")]
-		public async Task<IActionResult> Logout(RefreshTokenDto dto)
+		public async Task<IActionResult> Logout([FromBody] RefreshTokenDto dto)
 		{
 			var result = await _authService.LogoutAsync(dto);
 

@@ -1,9 +1,9 @@
 ﻿using ArticleManagementAPI.Enums;
 using System.ComponentModel.DataAnnotations;
 
-namespace ArticleManagementAPI.DTOs.Admin
+namespace ArticleManagementAPI.DTOs.User
 {
-	public class ChangeUserRoleDto
+	public class ChangeRoleDto
 	{
 		[EnumDataType(typeof(UserRole))]
 		public UserRole Role { get; set; }
