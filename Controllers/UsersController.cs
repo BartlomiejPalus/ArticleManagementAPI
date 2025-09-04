@@ -30,6 +30,23 @@ namespace ArticleManagementAPI.Controllers
 			return result.ToErrorActionResult(this);
 		}
 
+		[HttpDelete("me")]
+		[Authorize]
+		public async Task<IActionResult> RemoveMe()
+		{
+			var currentUserId = User.GetUserId();
+
+			if (currentUserId == Guid.Empty)
+				return BadRequest("Invalid user ID format");
+
+			var result = await _userService.RemoveMeAsync(currentUserId);
+
+			if (result.IsSuccess)
+				return NoContent();
+
+			return result.ToErrorActionResult(this);
+		}
+
 		[HttpDelete("{userId}")]
 		[Authorize(Roles = "Admin")]
 		public async Task<IActionResult> RemoveUser([FromRoute] Guid userId)

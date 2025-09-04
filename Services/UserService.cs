@@ -32,6 +32,20 @@ namespace ArticleManagementAPI.Services
 			return Result.Success();
 		}
 
+		public async Task<Result> RemoveMeAsync(Guid currentUserId)
+		{
+			var user = await _userRepository.GetByIdAsync(currentUserId);
+
+			if (user == null)
+				return Result.Failure(ErrorType.NotFound, "User not found");
+
+			_userRepository.Remove(user);
+
+			await _userRepository.SaveChangesAsync();
+
+			return Result.Success();
+		}
+
 		public async Task<Result> RemoveUserAsync(Guid userId)
 		{
 			var user = await _userRepository.GetByIdAsync(userId);
