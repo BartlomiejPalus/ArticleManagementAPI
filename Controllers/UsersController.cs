@@ -8,7 +8,6 @@ namespace ArticleManagementAPI.Controllers
 {
 	[Route("api/users")]
 	[ApiController]
-	[Authorize]
 	public class UsersController : ControllerBase
 	{
 		private readonly IUserService _userService;
@@ -63,6 +62,17 @@ namespace ArticleManagementAPI.Controllers
 			
 			if (result.IsSuccess) 
 				return NoContent();
+
+			return result.ToErrorActionResult(this);
+		}
+
+		[HttpGet("{userId}")]
+		public async Task<IActionResult> GetUserById([FromRoute] Guid userId)
+		{
+			var result = await _userService.GetUserByIdAsync(userId);
+
+			if (result.IsSuccess)
+				return Ok(result.Value);
 
 			return result.ToErrorActionResult(this);
 		}

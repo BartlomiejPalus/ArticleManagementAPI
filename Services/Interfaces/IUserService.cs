@@ -8,5 +8,6 @@ namespace ArticleManagementAPI.Services.Interfaces
 		Task<Result> ChangeUserRoleAsync(Guid userId, ChangeRoleDto dto);
 		Task<Result> RemoveMeAsync(Guid currentUserId);
 		Task<Result> RemoveUserAsync(Guid userId);
+		Task<Result<GetUserResponseDto>> GetUserByIdAsync(Guid userId);
 	}
 }

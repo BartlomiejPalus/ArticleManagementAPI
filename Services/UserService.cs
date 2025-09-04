@@ -62,5 +62,21 @@ namespace ArticleManagementAPI.Services
 			
 			return Result.Success();
 		}
+
+		public async Task<Result<GetUserResponseDto>> GetUserByIdAsync(Guid userId)
+		{
+			var user = await _userRepository.GetByIdAsync(userId);
+
+			if (user == null)
+				return Result<GetUserResponseDto>.Failure(ErrorType.NotFound, "User not found");
+
+			var userDto = new GetUserResponseDto
+			{
+				Id = user.Id,
+				Name = user.Name,
+			};
+
+			return Result<GetUserResponseDto>.Success(userDto);
+		}
 	}
 }
