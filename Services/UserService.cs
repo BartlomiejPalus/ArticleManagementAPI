@@ -61,7 +61,7 @@ namespace ArticleManagementAPI.Services
 
 			user.Role = dto.Role;
 
-			await _userRepository.SaveChangesAsync();
+			await _userRepository.UpdateAsync(user);
 
 			return Result.Success();
 		}

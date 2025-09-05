@@ -79,6 +79,7 @@ namespace ArticleManagementAPI.Services
 
 			refreshToken.Token = _jwtService.HashToken(refreshTokenValue);
 			refreshToken.ExpiresAt = DateTime.UtcNow.AddDays(_configuration.GetValue<int>("Jwt:RefreshTokenExpirationInDays"));
+			refreshToken.CreatedAt = DateTime.UtcNow;
 
 			await _authRepository.UpdateRefreshTokenAsync(refreshToken);
 

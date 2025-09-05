@@ -47,6 +47,12 @@ namespace ArticleManagementAPI.Repositories
 				.FirstOrDefaultAsync();
 		}
 
+		public async Task UpdateAsync(User user)
+		{
+			_context.Users.Update(user);
+			await _context.SaveChangesAsync();
+		}
+
 		public void Remove(User user)
 		{
 			_context.Users.Remove(user);
