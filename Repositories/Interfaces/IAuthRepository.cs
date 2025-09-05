@@ -4,10 +4,9 @@ namespace ArticleManagementAPI.Repositories.Interfaces
 {
 	public interface IAuthRepository
 	{
-		Task<User?> GetUserByEmailAsync(string email);
-		Task<bool> AddRefreshTokenAsync(RefreshToken refreshToken);
-		Task<User?> GetUserByRefreshTokenAsync(string refreshTokenHash);
-		Task<bool> UpdateRefreshTokenAsync(string oldRefreshTokenHash, RefreshToken newRefreshToken);
-		Task<bool> RemoveRefreshTokenAsync(string refreshToken);
+		Task AddRefreshTokenAsync(RefreshToken refreshToken);
+		Task<RefreshToken?> GetRefreshTokenAsync(string refreshToken);
+		Task UpdateRefreshTokenAsync(RefreshToken refreshToken);
+		Task RemoveRefreshTokenAsync(RefreshToken refreshToken);
 	}
 }

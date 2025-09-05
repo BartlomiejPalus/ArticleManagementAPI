@@ -29,9 +29,22 @@ namespace ArticleManagementAPI.Repositories
 			await _context.Users.AddAsync(user);
 		}
 
+		public async Task<User?> GetByEmailAsync(string email)
+		{
+			return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+		}
+
 		public async Task<User?> GetByIdAsync(Guid id)
 		{
 			return await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
+		}
+
+		public async Task<User?> GetByRefreshTokenAsync(string refreshTokenHash)
+		{
+			return await _context.Users
+				.Where(u => u.RefreshToken
+					.Any(rt => rt.Token == refreshTokenHash && rt.ExpiresAt > DateTime.UtcNow))
+				.FirstOrDefaultAsync();
 		}
 
 		public void Remove(User user)

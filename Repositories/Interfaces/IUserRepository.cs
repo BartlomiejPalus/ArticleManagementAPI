@@ -7,7 +7,9 @@ namespace ArticleManagementAPI.Repositories.Interfaces
 		Task<bool> EmailExistsAsync(string email);
 		Task<bool> NameExistsAsync(string name);
 		Task AddUserAsync(User user);
+		Task<User?> GetByEmailAsync(string email);
 		Task<User?> GetByIdAsync(Guid userId);
+		Task<User?> GetByRefreshTokenAsync(string refreshTokenHash);
 		void Remove(User user);
 		Task SaveChangesAsync();
 	}

@@ -11,14 +11,16 @@ namespace ArticleManagementAPI.Services
 	public class AuthService : IAuthService
 	{
 		private readonly IAuthRepository _authRepository;
+		private readonly IUserRepository _userRepository;
 		private readonly IJwtService _jwtService;
 		private readonly IConfiguration _configuration;
 		private readonly IPasswordHasher<User> _passwordHasher;
 
-		public AuthService(IAuthRepository authRepository, IJwtService jwtService,
+		public AuthService(IAuthRepository authRepository, IUserRepository userRepository, IJwtService jwtService,
 			IConfiguration configuration, IPasswordHasher<User> passwordHasher)
 		{
 			_authRepository = authRepository;
+			_userRepository = userRepository;
 			_jwtService = jwtService;
 			_configuration = configuration;
 			_passwordHasher = passwordHasher;
@@ -26,7 +28,7 @@ namespace ArticleManagementAPI.Services
 
 		public async Task<Result<AuthTokensDto>> LoginAsync(LoginDto dto)
 		{
-			var user = await _authRepository.GetUserByEmailAsync(dto.Email);
+			var user = await _userRepository.GetByEmailAsync(dto.Email);
 
 			if (user == null)
 				return Result<AuthTokensDto>.Failure(ErrorType.Unauthorized, "Invalid credentials");
@@ -48,8 +50,7 @@ namespace ArticleManagementAPI.Services
 				ExpiresAt = DateTime.UtcNow.AddDays(_configuration.GetValue<int>("Jwt:RefreshTokenExpirationInDays"))
 			};
 
-			if (!await _authRepository.AddRefreshTokenAsync(refreshToken))
-				return Result<AuthTokensDto>.Failure(ErrorType.InternalServerError, "Failed to save refresh token");
+			await _authRepository.AddRefreshTokenAsync(refreshToken);
 
 			var authTokensDto = new AuthTokensDto
 			{
@@ -63,7 +64,7 @@ namespace ArticleManagementAPI.Services
 		public async Task<Result<AuthTokensDto>> RefreshTokenAsync(RefreshTokenDto dto)
 		{
 			var refreshTokenHash = _jwtService.HashToken(dto.RefreshToken);
-			var user = await _authRepository.GetUserByRefreshTokenAsync(refreshTokenHash);
+			var user = await _userRepository.GetByRefreshTokenAsync(refreshTokenHash);
 			
 			if (user == null)
 				return Result<AuthTokensDto>.Failure(ErrorType.Unauthorized, "Invalid refresh token");
@@ -71,15 +72,15 @@ namespace ArticleManagementAPI.Services
 			var accessToken = _jwtService.GenerateAccessToken(user);
 			var refreshTokenValue = _jwtService.GenerateRefreshToken();
 
-			var refreshToken = new RefreshToken
-			{
-				Token = _jwtService.HashToken(refreshTokenValue),
-				UserId = user.Id,
-				ExpiresAt = DateTime.UtcNow.AddDays(_configuration.GetValue<int>("Jwt:RefreshTokenExpirationInDays"))
-			};
+			var refreshToken = await _authRepository.GetRefreshTokenAsync(refreshTokenHash);
 
-			if (!await _authRepository.UpdateRefreshTokenAsync(refreshTokenHash, refreshToken))
-				return Result<AuthTokensDto>.Failure(ErrorType.InternalServerError, "Failed to update refresh token");
+			if (refreshToken == null)
+				return Result<AuthTokensDto>.Failure(ErrorType.Unauthorized, "Invalid refresh token");
+
+			refreshToken.Token = _jwtService.HashToken(refreshTokenValue);
+			refreshToken.ExpiresAt = DateTime.UtcNow.AddDays(_configuration.GetValue<int>("Jwt:RefreshTokenExpirationInDays"));
+
+			await _authRepository.UpdateRefreshTokenAsync(refreshToken);
 
 			var authTokensDto = new AuthTokensDto
 			{
@@ -93,11 +94,14 @@ namespace ArticleManagementAPI.Services
 		public async Task<Result> LogoutAsync(RefreshTokenDto dto)
 		{
 			var refreshTokenHash = _jwtService.HashToken(dto.RefreshToken);
+			var refreshToken = await _authRepository.GetRefreshTokenAsync(refreshTokenHash);
 
-			if (await _authRepository.RemoveRefreshTokenAsync(refreshTokenHash))
-				return Result.Success();
+			if (refreshToken == null)
+				return Result.Failure(ErrorType.Unauthorized, "Invalid refresh token");
 
-			return Result.Failure(ErrorType.Unauthorized, "Invalid refresh token");
+			await _authRepository.RemoveRefreshTokenAsync(refreshToken);
+			
+			return Result.Success();
 		}
 	}
 }

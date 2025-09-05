@@ -14,50 +14,27 @@ namespace ArticleManagementAPI.Repositories
 			_context = context;
 		}
 
-		public async Task<User?> GetUserByEmailAsync(string email)
-		{
-			return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
-		}
-
-		public async Task<bool> AddRefreshTokenAsync(RefreshToken refreshToken)
+		public async Task AddRefreshTokenAsync(RefreshToken refreshToken)
 		{
 			_context.RefreshTokens.Add(refreshToken);
-			return await _context.SaveChangesAsync() > 0;
+			await _context.SaveChangesAsync();
 		}
 
-		public async Task<User?> GetUserByRefreshTokenAsync(string refreshTokenHash)
+		public async Task UpdateRefreshTokenAsync(RefreshToken refreshToken)
 		{
-			return await _context.RefreshTokens
-				.Where(rt => rt.Token == refreshTokenHash && rt.ExpiresAt > DateTime.UtcNow)
-				.Select(rt => rt.User)
-				.FirstOrDefaultAsync();
+			_context.RefreshTokens.Update(refreshToken);
+			await _context.SaveChangesAsync();
 		}
 
-		public async Task<bool> UpdateRefreshTokenAsync(string oldRefreshTokenHash, RefreshToken newRefreshToken)
+		public async Task<RefreshToken?> GetRefreshTokenAsync(string refreshToken)
 		{
-			var record = await _context.RefreshTokens
-				.Where(rf => rf.Token == oldRefreshTokenHash)
-				.FirstOrDefaultAsync();
-
-			if (record == null)
-				return false;
-
-			record.Token = newRefreshToken.Token;
-			record.ExpiresAt = newRefreshToken.ExpiresAt;
-			record.CreatedAt = newRefreshToken.CreatedAt;
-
-			return await _context.SaveChangesAsync() > 0;
+			return await _context.RefreshTokens.FirstOrDefaultAsync(rt => rt.Token == refreshToken);
 		}
 
-		public async Task<bool> RemoveRefreshTokenAsync(string refreshToken)
-		{
-			var token = await _context.RefreshTokens.FirstOrDefaultAsync(rt => rt.Token == refreshToken);
-
-			if(token == null)
-				return false;
-			
-			_context.RefreshTokens.Remove(token);
-			return await _context.SaveChangesAsync() > 0;
+		public async Task RemoveRefreshTokenAsync(RefreshToken refreshToken)
+		{			
+			_context.RefreshTokens.Remove(refreshToken);
+			await _context.SaveChangesAsync();
 		}
 	}
 }
