@@ -11,7 +11,6 @@ namespace ArticleManagementAPI.Repositories.Interfaces
 		Task<User?> GetByIdAsync(Guid userId);
 		Task<User?> GetByRefreshTokenAsync(string refreshTokenHash);
 		Task UpdateAsync(User user);
-		void Remove(User user);
-		Task SaveChangesAsync();
+		Task RemoveAsync(User user);
 	}
 }

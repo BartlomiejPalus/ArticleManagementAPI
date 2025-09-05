@@ -37,8 +37,6 @@ namespace ArticleManagementAPI.Services
 
 			await _userRepository.AddUserAsync(newUser);
 
-			await _userRepository.SaveChangesAsync();
-
 			var userDto = new RegisterResponseDto
 			{
 				Id = newUser.Id,
@@ -73,9 +71,7 @@ namespace ArticleManagementAPI.Services
 			if (user == null)
 				return Result.Failure(ErrorType.NotFound, "User not found");
 
-			_userRepository.Remove(user);
-
-			await _userRepository.SaveChangesAsync();
+			await _userRepository.RemoveAsync(user);
 
 			return Result.Success();
 		}
@@ -90,9 +86,7 @@ namespace ArticleManagementAPI.Services
 			if (user.Role == UserRole.Admin)
 				return Result.Failure(ErrorType.Forbidden, "Cannot remove admin");
 
-			_userRepository.Remove(user);
-
-			await _userRepository.SaveChangesAsync();
+			await _userRepository.RemoveAsync(user);
 			
 			return Result.Success();
 		}

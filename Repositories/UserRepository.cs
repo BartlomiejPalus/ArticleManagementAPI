@@ -27,6 +27,7 @@ namespace ArticleManagementAPI.Repositories
 		public async Task AddUserAsync(User user)
 		{
 			await _context.Users.AddAsync(user);
+			await _context.SaveChangesAsync();
 		}
 
 		public async Task<User?> GetByEmailAsync(string email)
@@ -53,13 +54,9 @@ namespace ArticleManagementAPI.Repositories
 			await _context.SaveChangesAsync();
 		}
 
-		public void Remove(User user)
+		public async Task RemoveAsync(User user)
 		{
 			_context.Users.Remove(user);
-		}
-
-		public async Task SaveChangesAsync()
-		{
 			await _context.SaveChangesAsync();
 		}
 	}
