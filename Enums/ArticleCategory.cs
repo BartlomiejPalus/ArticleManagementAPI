@@ -11,6 +11,7 @@
 		Politics,
 		Education,
 		Lifestyle,
-		Travel
+		Travel,
+		Other
 	}
 }

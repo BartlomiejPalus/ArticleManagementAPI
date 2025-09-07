@@ -1,4 +1,5 @@
-﻿using ArticleManagementAPI.Models;
+﻿using ArticleManagementAPI.Enums;
+using ArticleManagementAPI.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace ArticleManagementAPI.Data
@@ -17,6 +18,21 @@ namespace ArticleManagementAPI.Data
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			base.OnModelCreating(modelBuilder);
+
+			modelBuilder.Entity<Category>()
+				.Property(c => c.Name)
+				.HasConversion<String>();
+
+			var categories = Enum.GetValues(typeof(ArticleCategory))
+			.Cast<ArticleCategory>()
+			.Select((name, index) => new Category
+			{
+				Id = index + 1,
+				Name = name
+			})
+			.ToList();
+
+			modelBuilder.Entity<Category>().HasData(categories);
 		}
 	}
 }
