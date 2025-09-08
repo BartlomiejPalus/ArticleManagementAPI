@@ -1,6 +1,7 @@
 ﻿using ArticleManagementAPI.Common;
 using ArticleManagementAPI.DTOs.Article;
 using ArticleManagementAPI.Enums;
+using ArticleManagementAPI.Models;
 using ArticleManagementAPI.Repositories.Interfaces;
 using ArticleManagementAPI.Services.Interfaces;
 
@@ -13,6 +14,40 @@ namespace ArticleManagementAPI.Services
 		public ArticleService(IArticleRepository articleRepository)
 		{
 			_articleRepository = articleRepository;
+		}
+
+		public async Task<Result<ArticleAdminDto>> AddArticleAsync(Guid userId, AddArticleDto dto)
+		{
+			var categoryIds = dto.CategoryIds.Distinct();
+			var categories = await _articleRepository.GetCategoriesByIdAsync(categoryIds);
+
+			var newArticle = new Article
+			{
+				Title = dto.Title,
+				Content = dto.Content,
+				UserId = userId,
+				Categories = categories
+			};
+
+			await _articleRepository.AddAsync(newArticle);
+
+			var articleDto = new ArticleAdminDto
+			{
+				Id = newArticle.Id,
+				Title = newArticle.Title,
+				Content = newArticle.Content,
+				CreatedAt = newArticle.CreatedAt,
+				AuthorId = newArticle.UserId,
+				IsPublished = newArticle.IsPublished,
+				Categories = newArticle.Categories.Select(
+					c => new CategoryDto
+					{
+						Id = c.Id,
+						Name = c.Name.ToString()
+					}).ToList()
+			};
+
+			return Result<ArticleAdminDto>.Success(articleDto);
 		}
 
 		public async Task<Result<ArticleDto>> GetArticleByIdAsync(int id)
@@ -28,7 +63,8 @@ namespace ArticleManagementAPI.Services
 				Title = article.Title,
 				Content = article.Content,
 				CreatedAt = article.CreatedAt,
-				Author = article.User.Name,
+				AuthorName = article.User.Name,
+				AuthorId = article.UserId,
 				Categories = article.Categories.Select(
 					c => new CategoryDto
 					{
