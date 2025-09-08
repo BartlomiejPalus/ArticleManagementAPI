@@ -75,5 +75,20 @@ namespace ArticleManagementAPI.Services
 
 			return Result<ArticleDto>.Success(articleDto);
 		}
+
+		public async Task<Result> RemoveArticleAsync(int id, Guid userId, bool isAdmin)
+		{
+			var article = await _articleRepository.GetByIdAsync(id);
+
+			if (article == null)
+				return Result.Failure(ErrorType.NotFound, "Article not found");
+
+			if (!isAdmin && article.UserId != userId)
+				return Result.Failure(ErrorType.Forbidden, "You can only delete your own articles");
+
+			await _articleRepository.RemoveAsync(article);
+
+			return Result.Success();
+		}
 	}
 }

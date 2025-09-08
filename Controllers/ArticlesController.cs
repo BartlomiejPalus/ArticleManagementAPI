@@ -47,5 +47,24 @@ namespace ArticleManagementAPI.Controllers
 
 			return result.ToErrorActionResult(this);
 		}
+
+		[HttpDelete("{articleId}")]
+		[Authorize(Roles = "Admin, Writer")]
+		public async Task<IActionResult> RemoveArticle([FromRoute] int articleId)
+		{
+			var currentUserId = User.GetUserId();
+
+			if (currentUserId == Guid.Empty)
+				return BadRequest("Invalid user ID format");
+
+			var isAdmin = User.IsInRole("Admin");
+
+			var result = await _articleService.RemoveArticleAsync(articleId, currentUserId, isAdmin);
+
+			if (result.IsSuccess)
+				return NoContent();
+
+			return result.ToErrorActionResult(this);
+		}
 	}
 }

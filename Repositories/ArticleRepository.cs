@@ -28,6 +28,12 @@ namespace ArticleManagementAPI.Repositories
 				.FirstOrDefaultAsync(a => a.Id == id);
 		}
 
+		public async Task RemoveAsync(Article article)
+		{
+			_context.Articles.Remove(article);
+			await _context.SaveChangesAsync();
+		}
+
 		public async Task<IList<Category>> GetCategoriesByIdAsync(IEnumerable<int> categoriesId)
 		{
 			return await _context.Categories

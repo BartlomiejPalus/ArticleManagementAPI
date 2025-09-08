@@ -7,5 +7,6 @@ namespace ArticleManagementAPI.Services.Interfaces
 	{
 		Task<Result<ArticleAdminDto>> AddArticleAsync(Guid userId, AddArticleDto dto);
 		Task<Result<ArticleDto>> GetArticleByIdAsync(int id);
+		Task<Result> RemoveArticleAsync(int id, Guid userId, bool isAdmin);
 	}
 }
