@@ -2,7 +2,7 @@
 {
 	public enum ArticleCategory
 	{
-		Technology,
+		Technology = 1,
 		Health,
 		Science,
 		Business,
