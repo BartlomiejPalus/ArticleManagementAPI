@@ -28,6 +28,14 @@ namespace ArticleManagementAPI.Repositories
 				.FirstOrDefaultAsync(a => a.Id == id);
 		}
 
+		public IQueryable<Article> GetArticles()
+		{
+			return _context.Articles
+				.Include(a => a.User)
+				.Include(a => a.Categories) 
+				.AsQueryable();
+		}
+
 		public async Task RemoveAsync(Article article)
 		{
 			_context.Articles.Remove(article);

@@ -48,6 +48,21 @@ namespace ArticleManagementAPI.Controllers
 			return result.ToErrorActionResult(this);
 		}
 
+		[HttpGet]
+		public async Task<IActionResult> GetArticles([FromQuery] ArticleFilterDto filter)
+		{
+			var currentUserId = User.GetUserId();
+
+			var canSeeAll = User.IsInRole("Admin") || User.IsInRole("Reviewer");
+			
+			var result = await _articleService.GetArticlesAsync(currentUserId, canSeeAll, filter);
+
+			if (result.IsSuccess)
+				return Ok(result.Value);
+
+			return result.ToErrorActionResult(this);
+		}
+
 		[HttpDelete("{articleId}")]
 		[Authorize(Roles = "Admin, Writer")]
 		public async Task<IActionResult> RemoveArticle([FromRoute] int articleId)

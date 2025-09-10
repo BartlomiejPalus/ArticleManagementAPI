@@ -4,6 +4,7 @@ using ArticleManagementAPI.Enums;
 using ArticleManagementAPI.Models;
 using ArticleManagementAPI.Repositories.Interfaces;
 using ArticleManagementAPI.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace ArticleManagementAPI.Services
 {
@@ -74,6 +75,82 @@ namespace ArticleManagementAPI.Services
 			};
 
 			return Result<ArticleDto>.Success(articleDto);
+		}
+
+		public async Task<Result<IList<ArticleDto>>> GetArticlesAsync(Guid userId, bool canSeeAll, ArticleFilterDto filter)
+		{
+			var query = _articleRepository.GetArticles();
+
+			query = ApplyFilters(query, userId, canSeeAll, filter);
+
+			query = ApplySorting(query, filter);
+
+			query = ApplyPagination(query, filter);
+			
+			var articlesDto = await query
+				.Select(article => new ArticleDto
+				{
+					Id = article.Id,
+					Title = article.Title,
+					Content = article.Content,
+					CreatedAt = article.CreatedAt,
+					AuthorName = article.User.Name,
+					AuthorId = article.UserId,
+					Categories = article.Categories.Select(
+						c => new CategoryDto
+						{
+							Id = c.Id,
+							Name = c.Name.ToString()
+						}).ToList()
+				}).ToListAsync();
+
+			return Result<IList<ArticleDto>>.Success(articlesDto);
+		}
+
+		private IQueryable<Article> ApplyFilters(IQueryable<Article> query, Guid userId, bool canSeeAll, ArticleFilterDto filter)
+		{
+			if (!canSeeAll)
+			{
+				if (userId != Guid.Empty)
+					query = query.Where(a => a.UserId == userId || a.IsPublished);
+				else
+					query = query.Where(a => a.IsPublished);
+			}
+
+			if (!string.IsNullOrWhiteSpace(filter.Title))
+				query = query.Where(a => a.Title.Contains(filter.Title));
+
+			if (filter.AuthorId.HasValue)
+				query = query.Where(a => a.UserId == filter.AuthorId);
+
+			if (filter.CategoryIds?.Any() == true)
+				query = query.Where(a => a.Categories.Any(c => filter.CategoryIds.Contains(c.Id)));
+
+			return query;
+		}
+
+		private IQueryable<Article> ApplySorting(IQueryable<Article> query, ArticleFilterDto filter)
+		{
+			query = filter.SortBy switch
+			{
+				ArticleSortBy.CreatedAt => filter.SortDescending
+					? query.OrderByDescending(a => a.CreatedAt)
+					: query.OrderBy(a => a.CreatedAt),
+				ArticleSortBy.Title => filter.SortDescending
+					? query.OrderByDescending(a => a.Title)
+					: query.OrderBy(a => a.Title),
+				ArticleSortBy.AuthorName => filter.SortDescending
+					? query.OrderByDescending(a => a.User.Name)
+					: query.OrderBy(a => a.User.Name),
+				_ => query.OrderByDescending(a => a.CreatedAt)
+			};
+
+			return query;
+		}
+
+		private IQueryable<Article> ApplyPagination(IQueryable<Article> query, ArticleFilterDto filter)
+		{
+			return query.Skip(filter.PageSize * (filter.PageNumber - 1)).Take(filter.PageSize);
 		}
 
 		public async Task<Result> RemoveArticleAsync(int id, Guid userId, bool isAdmin)

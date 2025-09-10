@@ -6,6 +6,7 @@ namespace ArticleManagementAPI.Repositories.Interfaces
 	{
 		Task AddAsync(Article article);
 		Task<Article?> GetByIdAsync(int id);
+		IQueryable<Article> GetArticles();
 		Task RemoveAsync(Article article);
 		Task<IList<Category>> GetCategoriesByIdAsync(IEnumerable<int> categoriesId);
 	}
