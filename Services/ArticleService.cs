@@ -109,12 +109,23 @@ namespace ArticleManagementAPI.Services
 
 		private IQueryable<Article> ApplyFilters(IQueryable<Article> query, Guid userId, bool canSeeAll, ArticleFilterDto filter)
 		{
-			if (!canSeeAll)
+			switch (filter.Visability)
 			{
-				if (userId != Guid.Empty)
-					query = query.Where(a => a.UserId == userId || a.IsPublished);
-				else
+				case ArticleVisibilityFilter.Published:
 					query = query.Where(a => a.IsPublished);
+					break;
+
+				case ArticleVisibilityFilter.Unpublished:
+					if (canSeeAll)
+						query = query.Where(a => !a.IsPublished);
+					else
+						query = query.Where(a => a.UserId == userId && !a.IsPublished);
+					break;
+
+				case ArticleVisibilityFilter.All:
+					if (!canSeeAll)
+						query = query.Where(a => a.UserId == userId || a.IsPublished);
+					break;
 			}
 
 			if (!string.IsNullOrWhiteSpace(filter.Title))
@@ -125,6 +136,13 @@ namespace ArticleManagementAPI.Services
 
 			if (filter.CategoryIds?.Any() == true)
 				query = query.Where(a => a.Categories.Any(c => filter.CategoryIds.Contains(c.Id)));
+
+			if (filter.HasReview.HasValue)
+			{
+				query = filter.HasReview.Value
+					? query.Where(a => a.Reviews.Any()) 
+					: query.Where(a => !a.Reviews.Any());
+			}
 
 			return query;
 		}

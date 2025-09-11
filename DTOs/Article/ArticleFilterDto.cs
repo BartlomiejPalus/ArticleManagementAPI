@@ -8,6 +8,8 @@ namespace ArticleManagementAPI.DTOs.Article
 		public string? Title { get; set; }
 		public Guid? AuthorId { get; set; }
 		public List<int>? CategoryIds { get; set; }
+		public ArticleVisibilityFilter Visability { get; set; } = ArticleVisibilityFilter.Published;
+		public bool? HasReview { get; set; }
 
 		[Range(1, int.MaxValue)]
 		public int PageNumber { get; set; } = 1;

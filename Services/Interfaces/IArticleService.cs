@@ -1,6 +1,5 @@
 ﻿using ArticleManagementAPI.Common;
 using ArticleManagementAPI.DTOs.Article;
-using System.Security.Claims;
 
 namespace ArticleManagementAPI.Services.Interfaces
 {
