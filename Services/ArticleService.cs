@@ -18,7 +18,7 @@ namespace ArticleManagementAPI.Services
 			_articleRepository = articleRepository;
 		}
 
-		public async Task<Result<ArticleAdminDto>> AddArticleAsync(Guid userId, AddArticleDto dto)
+		public async Task<Result<ArticleDetailsDto>> AddArticleAsync(Guid userId, AddArticleDto dto)
 		{
 			var categoryIds = dto.CategoryIds.Distinct();
 			var categories = await _articleRepository.GetCategoriesByIdAsync(categoryIds);
@@ -33,12 +33,13 @@ namespace ArticleManagementAPI.Services
 
 			await _articleRepository.AddAsync(newArticle);
 
-			var articleDto = new ArticleAdminDto
+			var articleDetailsDto = new ArticleDetailsDto
 			{
 				Id = newArticle.Id,
 				Title = newArticle.Title,
 				Content = newArticle.Content,
 				CreatedAt = newArticle.CreatedAt,
+				AuthorName = newArticle.User.Name,
 				AuthorId = newArticle.UserId,
 				IsPublished = newArticle.IsPublished,
 				Categories = newArticle.Categories.Select(
@@ -49,17 +50,17 @@ namespace ArticleManagementAPI.Services
 					}).ToList()
 			};
 
-			return Result<ArticleAdminDto>.Success(articleDto);
+			return Result<ArticleDetailsDto>.Success(articleDetailsDto);
 		}
 
-		public async Task<Result<ArticleDto>> GetArticleByIdAsync(int id)
+		public async Task<Result<ArticleDetailsDto>> GetArticleByIdAsync(int id)
 		{
 			var article = await _articleRepository.GetByIdAsync(id);
 
 			if (article == null)
-				return Result<ArticleDto>.Failure(ErrorType.NotFound, "Article not found");
+				return Result<ArticleDetailsDto>.Failure(ErrorType.NotFound, "Article not found");
 
-			var articleDto = new ArticleDto
+			var articleDetailsDto = new ArticleDetailsDto
 			{
 				Id = article.Id,
 				Title = article.Title,
@@ -67,6 +68,7 @@ namespace ArticleManagementAPI.Services
 				CreatedAt = article.CreatedAt,
 				AuthorName = article.User.Name,
 				AuthorId = article.UserId,
+				IsPublished = article.IsPublished,
 				Categories = article.Categories.Select(
 					c => new CategoryDto
 					{
@@ -75,10 +77,10 @@ namespace ArticleManagementAPI.Services
 					}).ToList()
 			};
 
-			return Result<ArticleDto>.Success(articleDto);
+			return Result<ArticleDetailsDto>.Success(articleDetailsDto);
 		}
 
-		public async Task<Result<PagedResultDto<ArticleDto>>> GetArticlesAsync(Guid userId, bool canSeeAll, ArticleFilterDto filter)
+		public async Task<Result<PagedResultDto<ArticleListDto>>> GetArticlesAsync(Guid userId, bool canSeeAll, ArticleFilterDto filter)
 		{
 			var query = _articleRepository.GetArticles();
 
@@ -91,14 +93,14 @@ namespace ArticleManagementAPI.Services
 			query = ApplyPagination(query, filter);
 			
 			var items = await query
-				.Select(article => new ArticleDto
+				.Select(article => new ArticleListDto
 				{
 					Id = article.Id,
 					Title = article.Title,
-					Content = article.Content,
 					CreatedAt = article.CreatedAt,
 					AuthorName = article.User.Name,
 					AuthorId = article.UserId,
+					IsPublished = article.IsPublished,
 					Categories = article.Categories.Select(
 						c => new CategoryDto
 						{
@@ -107,7 +109,7 @@ namespace ArticleManagementAPI.Services
 						}).ToList()
 				}).ToListAsync();
 
-			var pagedResult = new PagedResultDto<ArticleDto>
+			var pagedResult = new PagedResultDto<ArticleListDto>
 			{
 				Items = items,
 				TotalCount = totalCount,
@@ -115,7 +117,7 @@ namespace ArticleManagementAPI.Services
 				PageSize = filter.PageSize
 			};
 
-			return Result<PagedResultDto<ArticleDto>>.Success(pagedResult);
+			return Result<PagedResultDto<ArticleListDto>>.Success(pagedResult);
 		}
 
 		private IQueryable<Article> ApplyFilters(IQueryable<Article> query, Guid userId, bool canSeeAll, ArticleFilterDto filter)
