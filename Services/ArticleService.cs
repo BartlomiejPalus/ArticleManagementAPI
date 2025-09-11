@@ -1,5 +1,6 @@
 ﻿using ArticleManagementAPI.Common;
 using ArticleManagementAPI.DTOs.Article;
+using ArticleManagementAPI.DTOs.Common;
 using ArticleManagementAPI.Enums;
 using ArticleManagementAPI.Models;
 using ArticleManagementAPI.Repositories.Interfaces;
@@ -77,7 +78,7 @@ namespace ArticleManagementAPI.Services
 			return Result<ArticleDto>.Success(articleDto);
 		}
 
-		public async Task<Result<IList<ArticleDto>>> GetArticlesAsync(Guid userId, bool canSeeAll, ArticleFilterDto filter)
+		public async Task<Result<PagedResultDto<ArticleDto>>> GetArticlesAsync(Guid userId, bool canSeeAll, ArticleFilterDto filter)
 		{
 			var query = _articleRepository.GetArticles();
 
@@ -85,9 +86,11 @@ namespace ArticleManagementAPI.Services
 
 			query = ApplySorting(query, filter);
 
+			var totalCount = await query.CountAsync();
+
 			query = ApplyPagination(query, filter);
 			
-			var articlesDto = await query
+			var items = await query
 				.Select(article => new ArticleDto
 				{
 					Id = article.Id,
@@ -104,7 +107,15 @@ namespace ArticleManagementAPI.Services
 						}).ToList()
 				}).ToListAsync();
 
-			return Result<IList<ArticleDto>>.Success(articlesDto);
+			var pagedResult = new PagedResultDto<ArticleDto>
+			{
+				Items = items,
+				TotalCount = totalCount,
+				PageNumber = filter.PageNumber,
+				PageSize = filter.PageSize
+			};
+
+			return Result<PagedResultDto<ArticleDto>>.Success(pagedResult);
 		}
 
 		private IQueryable<Article> ApplyFilters(IQueryable<Article> query, Guid userId, bool canSeeAll, ArticleFilterDto filter)
