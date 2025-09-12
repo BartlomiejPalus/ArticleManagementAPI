@@ -184,6 +184,23 @@ namespace ArticleManagementAPI.Services
 			return query.Skip(filter.PageSize * (filter.PageNumber - 1)).Take(filter.PageSize);
 		}
 
+		public async Task<Result> UpdateVisibilityAsync(int id, UpdateVisibilityDto dto)
+		{
+			var article = await _articleRepository.GetByIdAsync(id);
+
+			if (article == null)
+				return Result.Failure(ErrorType.NotFound, "Article not found");
+
+			if (article.IsPublished == dto.IsPublished)
+				return Result.Failure(ErrorType.Conflict, "Article already has this visibility status");
+
+			article.IsPublished = dto.IsPublished;
+
+			await _articleRepository.SaveChangesAsync();
+
+			return Result.Success();
+		}
+
 		public async Task<Result> RemoveArticleAsync(int id, Guid userId, bool isAdmin)
 		{
 			var article = await _articleRepository.GetByIdAsync(id);

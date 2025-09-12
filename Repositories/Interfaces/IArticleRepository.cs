@@ -9,5 +9,6 @@ namespace ArticleManagementAPI.Repositories.Interfaces
 		IQueryable<Article> GetArticles();
 		Task RemoveAsync(Article article);
 		Task<IList<Category>> GetCategoriesByIdAsync(IEnumerable<int> categoriesId);
+		Task SaveChangesAsync();
 	}
 }

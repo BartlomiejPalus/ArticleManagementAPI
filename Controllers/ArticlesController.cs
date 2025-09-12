@@ -63,6 +63,18 @@ namespace ArticleManagementAPI.Controllers
 			return result.ToErrorActionResult(this);
 		}
 
+		[HttpPatch("{articleId}/visibility")]
+		[Authorize(Roles = "Admin, Reviewer")]
+		public async Task<IActionResult> UpdateVisibility([FromRoute] int articleId, [FromBody] UpdateVisibilityDto dto)
+		{
+			var result = await _articleService.UpdateVisibilityAsync(articleId, dto);
+			
+			if (result.IsSuccess)
+				return NoContent();
+			
+			return result.ToErrorActionResult(this);
+		}
+
 		[HttpDelete("{articleId}")]
 		[Authorize(Roles = "Admin, Writer")]
 		public async Task<IActionResult> RemoveArticle([FromRoute] int articleId)

@@ -9,6 +9,7 @@ namespace ArticleManagementAPI.Services.Interfaces
 		Task<Result<ArticleDetailsDto>> AddArticleAsync(Guid userId, AddArticleDto dto);
 		Task<Result<ArticleDetailsDto>> GetArticleByIdAsync(int id);
 		Task<Result<PagedResultDto<ArticleListDto>>> GetArticlesAsync(Guid userId, bool canSeeAll, ArticleFilterDto filter);
+		Task<Result> UpdateVisibilityAsync(int id, UpdateVisibilityDto dto);
 		Task<Result> RemoveArticleAsync(int id, Guid userId, bool isAdmin);
 	}
 }
