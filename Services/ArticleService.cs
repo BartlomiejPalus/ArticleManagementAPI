@@ -18,7 +18,7 @@ namespace ArticleManagementAPI.Services
 			_articleRepository = articleRepository;
 		}
 
-		public async Task<Result<ArticleDetailsDto>> AddArticleAsync(Guid userId, AddArticleDto dto)
+		public async Task<Result<ArticleDetailsDto>> AddArticleAsync(Guid userId, ArticleRequestDto dto)
 		{
 			var categoryIds = dto.CategoryIds.Distinct();
 			var categories = await _articleRepository.GetCategoriesByIdAsync(categoryIds);
@@ -201,7 +201,28 @@ namespace ArticleManagementAPI.Services
 			return Result.Success();
 		}
 
-		public async Task<Result> RemoveArticleAsync(int id, Guid userId, bool isAdmin)
+		public async Task<Result> UpdateArticleAsync(Guid userId, int id, ArticleRequestDto dto)
+		{
+			var article = await _articleRepository.GetByIdAsync(id);
+
+			if (article == null)
+				return Result.Failure(ErrorType.NotFound, "Article not found");
+
+			if (article.UserId != userId)
+				return Result.Failure(ErrorType.Forbidden, "You can only update your own articles");
+
+			article.Title = dto.Title;
+			article.Content = dto.Content;
+
+			var categories = await _articleRepository.GetCategoriesByIdAsync(dto.CategoryIds);
+			article.Categories = categories;
+
+			await _articleRepository.SaveChangesAsync();
+
+			return Result.Success();
+		}
+
+		public async Task<Result> RemoveArticleAsync(Guid userId, int id, bool isAdmin)
 		{
 			var article = await _articleRepository.GetByIdAsync(id);
 

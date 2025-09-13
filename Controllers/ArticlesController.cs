@@ -19,7 +19,7 @@ namespace ArticleManagementAPI.Controllers
 
 		[HttpPost]
 		[Authorize(Roles = "Writer")]
-		public async Task<IActionResult> AddArticle([FromBody] AddArticleDto dto)
+		public async Task<IActionResult> AddArticle([FromBody] ArticleRequestDto dto)
 		{
 			var currentUserId = User.GetUserId();
 
@@ -75,6 +75,20 @@ namespace ArticleManagementAPI.Controllers
 			return result.ToErrorActionResult(this);
 		}
 
+		[HttpPut("{articleId}")]
+		[Authorize(Roles = "Writer")]
+		public async Task<IActionResult> UpdateArticle([FromRoute] int articleId, [FromBody] ArticleRequestDto dto)
+		{
+			var currentUserId = User.GetUserId();
+
+			var result = await _articleService.UpdateArticleAsync(currentUserId, articleId, dto);
+
+			if (result.IsSuccess)
+				return NoContent();
+
+			return result.ToErrorActionResult(this);
+		}
+
 		[HttpDelete("{articleId}")]
 		[Authorize(Roles = "Admin, Writer")]
 		public async Task<IActionResult> RemoveArticle([FromRoute] int articleId)
@@ -86,7 +100,7 @@ namespace ArticleManagementAPI.Controllers
 
 			var isAdmin = User.IsInRole("Admin");
 
-			var result = await _articleService.RemoveArticleAsync(articleId, currentUserId, isAdmin);
+			var result = await _articleService.RemoveArticleAsync(currentUserId, articleId, isAdmin);
 
 			if (result.IsSuccess)
 				return NoContent();

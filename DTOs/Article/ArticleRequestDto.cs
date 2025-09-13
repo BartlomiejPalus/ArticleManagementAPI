@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ArticleManagementAPI.DTOs.Article
 {
-	public class AddArticleDto
+	public class ArticleRequestDto
 	{
 		[Required]
 		public string Title { get; set; }
