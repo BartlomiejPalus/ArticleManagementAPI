@@ -20,12 +20,6 @@ namespace ArticleManagementAPI.Repositories
 			await _context.SaveChangesAsync();
 		}
 
-		public async Task UpdateRefreshTokenAsync(RefreshToken refreshToken)
-		{
-			_context.RefreshTokens.Update(refreshToken);
-			await _context.SaveChangesAsync();
-		}
-
 		public async Task<RefreshToken?> GetRefreshTokenAsync(string refreshToken)
 		{
 			return await _context.RefreshTokens.FirstOrDefaultAsync(rt => rt.Token == refreshToken);
@@ -34,6 +28,11 @@ namespace ArticleManagementAPI.Repositories
 		public async Task RemoveRefreshTokenAsync(RefreshToken refreshToken)
 		{			
 			_context.RefreshTokens.Remove(refreshToken);
+			await _context.SaveChangesAsync();
+		}
+
+		public async Task SaveChangesAsync()
+		{
 			await _context.SaveChangesAsync();
 		}
 	}

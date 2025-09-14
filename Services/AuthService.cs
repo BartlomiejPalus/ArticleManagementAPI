@@ -81,7 +81,7 @@ namespace ArticleManagementAPI.Services
 			refreshToken.ExpiresAt = DateTime.UtcNow.AddDays(_configuration.GetValue<int>("Jwt:RefreshTokenExpirationInDays"));
 			refreshToken.CreatedAt = DateTime.UtcNow;
 
-			await _authRepository.UpdateRefreshTokenAsync(refreshToken);
+			await _authRepository.SaveChangesAsync();
 
 			var authTokensDto = new AuthTokensDto
 			{

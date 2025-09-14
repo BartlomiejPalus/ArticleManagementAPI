@@ -1,4 +1,5 @@
 ﻿using ArticleManagementAPI.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace ArticleManagementAPI.Repositories.Interfaces
 {
@@ -10,7 +11,7 @@ namespace ArticleManagementAPI.Repositories.Interfaces
 		Task<User?> GetByEmailAsync(string email);
 		Task<User?> GetByIdAsync(Guid userId);
 		Task<User?> GetByRefreshTokenAsync(string refreshTokenHash);
-		Task UpdateAsync(User user);
 		Task RemoveAsync(User user);
+		Task SaveChangesAsync();
 	}
 }
