@@ -14,6 +14,34 @@ namespace ArticleManagementAPI.Services
 		{
 			_commentRepository = commentRepository;
 		}
+
+		public async Task<Result<GetCommentDto>> AddCommentAsync(Guid userId, int articleId, CommentRequestDto dto)
+		{
+			var comment = new Comment
+			{
+				Content = dto.Content,
+				UserId = userId,
+				ArticleId = articleId,
+			};
+
+			await _commentRepository.AddAsync(comment);
+
+			var addedComment = await _commentRepository.GetByIdAsync(comment.Id);
+
+			if (addedComment == null)
+				return Result<GetCommentDto>.Failure(Enums.ErrorType.NotFound, "Failed to retrieve added comment");
+
+			var commentDto = new GetCommentDto
+			{
+				Id = addedComment.Id,
+				Content = addedComment.Content,
+				CreatedAt = addedComment.CreatedAt,
+				UserId = addedComment.UserId,
+				UserName = addedComment.User.Name
+			};
+
+			return Result<GetCommentDto>.Success(commentDto);
+		}
 		
 		public async Task<Result<GetCommentDto>> GetCommentByIdAsync(int id)
 		{

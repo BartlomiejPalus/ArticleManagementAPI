@@ -1,5 +1,7 @@
 ﻿using ArticleManagementAPI.Common;
+using ArticleManagementAPI.DTOs.Comment;
 using ArticleManagementAPI.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ArticleManagementAPI.Controllers
@@ -13,6 +15,23 @@ namespace ArticleManagementAPI.Controllers
 		public CommentsController(ICommentService commentService)
 		{
 			_commentService = commentService;
+		}
+
+		[HttpPost("/api/articles/{articleId}/comments")]
+		[Authorize]
+		public async Task<IActionResult> AddComment([FromRoute] int articleId, [FromBody] CommentRequestDto dto)
+		{
+			var userId = User.GetUserId();
+
+			var result = await _commentService.AddCommentAsync(userId, articleId, dto);
+
+			if (result.IsSuccess)
+			{
+				var commentDto = result.Value;
+				return CreatedAtAction(nameof(GetCommentById), new { commentId = commentDto.Id }, commentDto);
+			}
+			
+			return result.ToErrorActionResult(this);
 		}
 
 		[HttpGet("{commentId}")]

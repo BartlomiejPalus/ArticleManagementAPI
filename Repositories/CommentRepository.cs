@@ -14,6 +14,12 @@ namespace ArticleManagementAPI.Repositories
 			_context = context;
 		}
 
+		public async Task AddAsync(Comment comment)
+		{
+			await _context.Comments.AddAsync(comment);
+			await _context.SaveChangesAsync();
+		}
+
 		public async Task<Comment?> GetByIdAsync(int id)
 		{
 			return await _context.Comments
