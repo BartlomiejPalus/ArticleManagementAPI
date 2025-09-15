@@ -1,5 +1,6 @@
 ﻿using ArticleManagementAPI.Common;
 using ArticleManagementAPI.DTOs.Comment;
+using ArticleManagementAPI.Enums;
 using ArticleManagementAPI.Models;
 using ArticleManagementAPI.Repositories.Interfaces;
 using ArticleManagementAPI.Services.Interfaces;
@@ -29,7 +30,7 @@ namespace ArticleManagementAPI.Services
 			var addedComment = await _commentRepository.GetByIdAsync(comment.Id);
 
 			if (addedComment == null)
-				return Result<GetCommentDto>.Failure(Enums.ErrorType.NotFound, "Failed to retrieve added comment");
+				return Result<GetCommentDto>.Failure(ErrorType.NotFound, "Failed to retrieve added comment");
 
 			var commentDto = new GetCommentDto
 			{
@@ -49,7 +50,7 @@ namespace ArticleManagementAPI.Services
 			var comment = await _commentRepository.GetByIdAsync(id);
 
 			if (comment == null)
-				return Result<GetCommentDto>.Failure(Enums.ErrorType.NotFound, "Comment not found");
+				return Result<GetCommentDto>.Failure(ErrorType.NotFound, "Comment not found");
 
 			var commentDto = new GetCommentDto
 			{
@@ -62,6 +63,21 @@ namespace ArticleManagementAPI.Services
 			};
 
 			return Result<GetCommentDto>.Success(commentDto);
+		}
+
+		public async Task<Result> RemoveCommentAsync(Guid userId, bool isAdmin, int commentId)
+		{
+			var comment = await _commentRepository.GetByIdAsync(commentId);
+
+			if (comment == null)
+				return Result.Failure(ErrorType.NotFound, "Comment not found");
+
+			if (comment.UserId != userId && !isAdmin)
+				return Result.Failure(ErrorType.Forbidden, "You can only delete your own comments");
+
+			await _commentRepository.RemoveAsync(comment);
+
+			return Result.Success();
 		}
 	}
 }

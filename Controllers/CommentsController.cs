@@ -44,5 +44,24 @@ namespace ArticleManagementAPI.Controllers
 
 			return result.ToErrorActionResult(this);
 		}
+
+		[HttpDelete("{commentId}")]
+		[Authorize]
+		public async Task<IActionResult> RemoveComment([FromRoute] int commentId)
+		{
+			var currentUserId = User.GetUserId();
+
+			if (currentUserId == Guid.Empty)
+				return BadRequest("Invalid user ID format");
+
+			var isAdmin = User.IsInRole("Admin");
+
+			var result = await _commentService.RemoveCommentAsync(currentUserId, isAdmin, commentId);
+
+			if (result.IsSuccess)
+				return NoContent();
+
+			return result.ToErrorActionResult(this);
+		}
 	}
 }

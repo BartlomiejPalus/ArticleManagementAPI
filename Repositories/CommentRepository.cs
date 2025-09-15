@@ -26,5 +26,11 @@ namespace ArticleManagementAPI.Repositories
 				.Include(c => c.User)
 				.FirstOrDefaultAsync(c => c.Id == id);
 		}
+
+		public async Task RemoveAsync(Comment comment)
+		{
+			_context.Comments.Remove(comment);
+			await _context.SaveChangesAsync();
+		}
 	}
 }
