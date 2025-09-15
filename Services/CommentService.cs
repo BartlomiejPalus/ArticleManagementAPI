@@ -37,7 +37,8 @@ namespace ArticleManagementAPI.Services
 				Content = addedComment.Content,
 				CreatedAt = addedComment.CreatedAt,
 				UserId = addedComment.UserId,
-				UserName = addedComment.User.Name
+				UserName = addedComment.User.Name,
+				ArticleId = addedComment.ArticleId
 			};
 
 			return Result<GetCommentDto>.Success(commentDto);
@@ -57,6 +58,7 @@ namespace ArticleManagementAPI.Services
 				CreatedAt = comment.CreatedAt,
 				UserId = comment.UserId,
 				UserName = comment.User.Name,
+				ArticleId = comment.ArticleId
 			};
 
 			return Result<GetCommentDto>.Success(commentDto);
