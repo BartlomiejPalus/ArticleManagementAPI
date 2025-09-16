@@ -27,11 +27,11 @@ namespace ArticleManagementAPI.Repositories
 				.FirstOrDefaultAsync(c => c.Id == id);
 		}
 
-		public IQueryable<Comment> GetByArticleId(int id)
+		public IQueryable<Comment> GetAll()
 		{
 			return _context.Comments
 				.Include(c => c.User)
-				.Where(c => c.ArticleId == id);
+				.AsQueryable();
 		}
 
 		public async Task RemoveAsync(Comment comment)

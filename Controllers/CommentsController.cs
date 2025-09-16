@@ -46,9 +46,20 @@ namespace ArticleManagementAPI.Controllers
 		}
 
 		[HttpGet("/api/articles/{articleId}/comments")]
-		public async Task<IActionResult> GetCommentsByArticle([FromRoute] int articleId, [FromQuery] CommentFilterDto dto)
+		public async Task<IActionResult> GetCommentsByArticleId([FromRoute] int articleId, [FromQuery] CommentFilterDto dto)
 		{
-			var result = await _commentService.GetCommentsByArticleId(articleId, dto);
+			var result = await _commentService.GetComments(null, articleId, dto);
+
+			if (result.IsSuccess)
+				return Ok(result.Value);
+
+			return result.ToErrorActionResult(this);
+		}
+
+		[HttpGet("/api/users/{userId}/comments")]
+		public async Task<IActionResult> GetCommentsByUserId([FromRoute] Guid userId, [FromQuery] CommentFilterDto dto)
+		{
+			var result = await _commentService.GetComments(userId, null, dto);
 
 			if (result.IsSuccess)
 				return Ok(result.Value);

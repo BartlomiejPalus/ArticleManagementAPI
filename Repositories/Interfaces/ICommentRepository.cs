@@ -6,7 +6,7 @@ namespace ArticleManagementAPI.Repositories.Interfaces
 	{
 		Task AddAsync(Comment comment);
 		Task<Comment?> GetByIdAsync(int id);
-		IQueryable<Comment> GetByArticleId(int id);
+		IQueryable<Comment> GetAll();
 		Task RemoveAsync(Comment comment);
 	}
 }

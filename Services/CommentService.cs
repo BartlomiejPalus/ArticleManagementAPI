@@ -67,9 +67,16 @@ namespace ArticleManagementAPI.Services
 			return Result<GetCommentDto>.Success(commentDto);
 		}
 
-		public async Task<Result<PagedResultDto<GetCommentDto>>> GetCommentsByArticleId(int articleId, CommentFilterDto dto)
+		public async Task<Result<PagedResultDto<GetCommentDto>>> GetCommentsAsync(Guid? userId, int? articleId, CommentFilterDto dto)
 		{
-			var query = _commentRepository.GetByArticleId(articleId);
+			var query = _commentRepository.GetAll();
+
+			if (userId.HasValue)
+				query = query.Where(c => c.UserId == userId.Value);
+			else if (articleId.HasValue)
+				query = query.Where(c => c.ArticleId == articleId.Value);
+			else
+				return Result<PagedResultDto<GetCommentDto>>.Failure(ErrorType.BadRequest, "Missing filter");
 
 			query = ApplySorting(query, dto);
 
