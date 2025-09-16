@@ -1,9 +1,11 @@
 ﻿using ArticleManagementAPI.Common;
 using ArticleManagementAPI.DTOs.Comment;
+using ArticleManagementAPI.DTOs.Common;
 using ArticleManagementAPI.Enums;
 using ArticleManagementAPI.Models;
 using ArticleManagementAPI.Repositories.Interfaces;
 using ArticleManagementAPI.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace ArticleManagementAPI.Services
 {
@@ -63,6 +65,48 @@ namespace ArticleManagementAPI.Services
 			};
 
 			return Result<GetCommentDto>.Success(commentDto);
+		}
+
+		public async Task<Result<PagedResultDto<GetCommentDto>>> GetCommentsByArticleId(int articleId, CommentFilterDto dto)
+		{
+			var query = _commentRepository.GetByArticleId(articleId);
+
+			query = ApplySorting(query, dto);
+
+			var totalComments = await query.CountAsync();
+
+			query = ApplyPagination(query, dto);
+
+			var items = await query
+				.Select(comment => new GetCommentDto
+				{
+					Id = comment.Id,
+					Content = comment.Content,
+					CreatedAt = comment.CreatedAt,
+					UserId = comment.UserId,
+					UserName = comment.User.Name,
+					ArticleId = comment.ArticleId
+				}).ToListAsync();
+
+			var pagedResult = new PagedResultDto<GetCommentDto>
+			{
+				Items = items,
+				TotalCount = totalComments,
+				PageNumber = dto.PageNumber,
+				PageSize = dto.PageSize
+			};
+
+			return Result<PagedResultDto<GetCommentDto>>.Success(pagedResult);
+		}
+
+		private IQueryable<Comment> ApplySorting(IQueryable<Comment> query, CommentFilterDto dto)
+		{
+			return dto.SortDescending ? query.OrderByDescending(c => c.CreatedAt) : query.OrderBy(c => c.CreatedAt);
+		}
+
+		private IQueryable<Comment> ApplyPagination(IQueryable<Comment> query, CommentFilterDto dto)
+		{
+			return query.Skip(dto.PageSize * (dto.PageNumber - 1)).Take(dto.PageSize);
 		}
 
 		public async Task<Result> RemoveCommentAsync(Guid userId, bool isAdmin, int commentId)

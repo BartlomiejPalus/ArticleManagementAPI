@@ -27,6 +27,13 @@ namespace ArticleManagementAPI.Repositories
 				.FirstOrDefaultAsync(c => c.Id == id);
 		}
 
+		public IQueryable<Comment> GetByArticleId(int id)
+		{
+			return _context.Comments
+				.Include(c => c.User)
+				.Where(c => c.ArticleId == id);
+		}
+
 		public async Task RemoveAsync(Comment comment)
 		{
 			_context.Comments.Remove(comment);

@@ -45,6 +45,17 @@ namespace ArticleManagementAPI.Controllers
 			return result.ToErrorActionResult(this);
 		}
 
+		[HttpGet("/api/articles/{articleId}/comments")]
+		public async Task<IActionResult> GetCommentsByArticle([FromRoute] int articleId, [FromQuery] CommentFilterDto dto)
+		{
+			var result = await _commentService.GetCommentsByArticleId(articleId, dto);
+
+			if (result.IsSuccess)
+				return Ok(result.Value);
+
+			return result.ToErrorActionResult(this);
+		}
+
 		[HttpDelete("{commentId}")]
 		[Authorize]
 		public async Task<IActionResult> RemoveComment([FromRoute] int commentId)
