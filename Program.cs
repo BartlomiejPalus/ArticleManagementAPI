@@ -1,4 +1,5 @@
 using ArticleManagementAPI.Data;
+using ArticleManagementAPI.Middleware;
 using ArticleManagementAPI.Models;
 using ArticleManagementAPI.Repositories;
 using ArticleManagementAPI.Repositories.Interfaces;
@@ -49,10 +50,13 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+builder.Services.AddScoped<ErrorHandlingMiddleware>();
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+app.UseMiddleware<ErrorHandlingMiddleware>();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
