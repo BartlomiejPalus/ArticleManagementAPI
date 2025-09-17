@@ -4,6 +4,7 @@ using ArticleManagementAPI.Enums;
 using ArticleManagementAPI.Models;
 using ArticleManagementAPI.Repositories.Interfaces;
 using ArticleManagementAPI.Services.Interfaces;
+using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 
 namespace ArticleManagementAPI.Services
@@ -12,11 +13,13 @@ namespace ArticleManagementAPI.Services
 	{
 		private readonly IUserRepository _userRepository;
 		private readonly IPasswordHasher<User> _passwordHasher;
+		private readonly IMapper _mapper;
 
-		public UserService(IUserRepository userRepository, IPasswordHasher<User> passwordHasher)
+		public UserService(IUserRepository userRepository, IPasswordHasher<User> passwordHasher, IMapper mapper)
 		{
 			_userRepository = userRepository;
 			_passwordHasher = passwordHasher;
+			_mapper = mapper;
 		}
 
 		public async Task<Result<RegisterResponseDto>> RegisterUserAsync(RegisterDto dto)
@@ -37,12 +40,7 @@ namespace ArticleManagementAPI.Services
 
 			await _userRepository.AddUserAsync(newUser);
 
-			var userDto = new RegisterResponseDto
-			{
-				Id = newUser.Id,
-				Name = newUser.Name,
-				Email = newUser.Email,
-			};
+			var userDto = _mapper.Map<RegisterResponseDto>(newUser);
 
 			return Result<RegisterResponseDto>.Success(userDto);
 		}
@@ -98,11 +96,7 @@ namespace ArticleManagementAPI.Services
 			if (user == null)
 				return Result<GetUserResponseDto>.Failure(ErrorType.NotFound, "User not found");
 
-			var userDto = new GetUserResponseDto
-			{
-				Id = user.Id,
-				Name = user.Name,
-			};
+			var userDto = _mapper.Map<GetUserResponseDto>(user);
 
 			return Result<GetUserResponseDto>.Success(userDto);
 		}
