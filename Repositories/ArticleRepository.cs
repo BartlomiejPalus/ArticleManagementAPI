@@ -45,7 +45,6 @@ namespace ArticleManagementAPI.Repositories
 		public async Task<IList<Category>> GetCategoriesByIdAsync(IEnumerable<int> categoriesId)
 		{
 			return await _context.Categories
-				.AsNoTracking()
 				.Where(c => categoriesId.Contains(c.Id))
 				.ToListAsync();
 		}

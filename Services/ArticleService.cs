@@ -5,6 +5,7 @@ using ArticleManagementAPI.Enums;
 using ArticleManagementAPI.Models;
 using ArticleManagementAPI.Repositories.Interfaces;
 using ArticleManagementAPI.Services.Interfaces;
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 
 namespace ArticleManagementAPI.Services
@@ -12,10 +13,12 @@ namespace ArticleManagementAPI.Services
 	public class ArticleService : IArticleService
 	{
 		private readonly IArticleRepository _articleRepository;
+		private readonly IMapper _mapper;
 
-		public ArticleService(IArticleRepository articleRepository)
+		public ArticleService(IArticleRepository articleRepository, IMapper mapper)
 		{
 			_articleRepository = articleRepository;
+			_mapper = mapper;
 		}
 
 		public async Task<Result<ArticleDetailsDto>> AddArticleAsync(Guid userId, ArticleRequestDto dto)
@@ -23,7 +26,7 @@ namespace ArticleManagementAPI.Services
 			var categoryIds = dto.CategoryIds.Distinct();
 			var categories = await _articleRepository.GetCategoriesByIdAsync(categoryIds);
 
-			var newArticle = new Article
+			var article = new Article
 			{
 				Title = dto.Title,
 				Content = dto.Content,
@@ -31,24 +34,14 @@ namespace ArticleManagementAPI.Services
 				Categories = categories
 			};
 
-			await _articleRepository.AddAsync(newArticle);
+			await _articleRepository.AddAsync(article);
 
-			var articleDetailsDto = new ArticleDetailsDto
-			{
-				Id = newArticle.Id,
-				Title = newArticle.Title,
-				Content = newArticle.Content,
-				CreatedAt = newArticle.CreatedAt,
-				AuthorName = newArticle.User.Name,
-				AuthorId = newArticle.UserId,
-				IsPublished = newArticle.IsPublished,
-				Categories = newArticle.Categories.Select(
-					c => new CategoryDto
-					{
-						Id = c.Id,
-						Name = c.Name.ToString()
-					}).ToList()
-			};
+			var newArticle = await _articleRepository.GetByIdAsync(article.Id);
+
+			if (newArticle == null)
+				return Result<ArticleDetailsDto>.Failure(ErrorType.NotFound, "Failed to retrieve added article");
+
+			var articleDetailsDto = _mapper.Map<ArticleDetailsDto>(newArticle);
 
 			return Result<ArticleDetailsDto>.Success(articleDetailsDto);
 		}
@@ -60,22 +53,7 @@ namespace ArticleManagementAPI.Services
 			if (article == null)
 				return Result<ArticleDetailsDto>.Failure(ErrorType.NotFound, "Article not found");
 
-			var articleDetailsDto = new ArticleDetailsDto
-			{
-				Id = article.Id,
-				Title = article.Title,
-				Content = article.Content,
-				CreatedAt = article.CreatedAt,
-				AuthorName = article.User.Name,
-				AuthorId = article.UserId,
-				IsPublished = article.IsPublished,
-				Categories = article.Categories.Select(
-					c => new CategoryDto
-					{
-						Id = c.Id,
-						Name = c.Name.ToString()
-					}).ToList()
-			};
+			var articleDetailsDto = _mapper.Map<ArticleDetailsDto>(article);
 
 			return Result<ArticleDetailsDto>.Success(articleDetailsDto);
 		}
@@ -93,21 +71,8 @@ namespace ArticleManagementAPI.Services
 			query = ApplyPagination(query, filter);
 			
 			var items = await query
-				.Select(article => new ArticleListDto
-				{
-					Id = article.Id,
-					Title = article.Title,
-					CreatedAt = article.CreatedAt,
-					AuthorName = article.User.Name,
-					AuthorId = article.UserId,
-					IsPublished = article.IsPublished,
-					Categories = article.Categories.Select(
-						c => new CategoryDto
-						{
-							Id = c.Id,
-							Name = c.Name.ToString()
-						}).ToList()
-				}).ToListAsync();
+				.Select(article => _mapper.Map<ArticleListDto>(article))
+				.ToListAsync();
 
 			var pagedResult = new PagedResultDto<ArticleListDto>
 			{
