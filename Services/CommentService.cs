@@ -5,6 +5,7 @@ using ArticleManagementAPI.Enums;
 using ArticleManagementAPI.Models;
 using ArticleManagementAPI.Repositories.Interfaces;
 using ArticleManagementAPI.Services.Interfaces;
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 
 namespace ArticleManagementAPI.Services
@@ -12,10 +13,12 @@ namespace ArticleManagementAPI.Services
 	public class CommentService : ICommentService
 	{
 		private readonly ICommentRepository _commentRepository;
+		private readonly IMapper _mapper;
 
-		public CommentService(ICommentRepository commentRepository)
+		public CommentService(ICommentRepository commentRepository, IMapper mapper)
 		{
 			_commentRepository = commentRepository;
+			_mapper = mapper;
 		}
 
 		public async Task<Result<GetCommentDto>> AddCommentAsync(Guid userId, int articleId, CommentRequestDto dto)
@@ -34,15 +37,7 @@ namespace ArticleManagementAPI.Services
 			if (addedComment == null)
 				return Result<GetCommentDto>.Failure(ErrorType.NotFound, "Failed to retrieve added comment");
 
-			var commentDto = new GetCommentDto
-			{
-				Id = addedComment.Id,
-				Content = addedComment.Content,
-				CreatedAt = addedComment.CreatedAt,
-				UserId = addedComment.UserId,
-				UserName = addedComment.User.Name,
-				ArticleId = addedComment.ArticleId
-			};
+			var commentDto = _mapper.Map<GetCommentDto>(comment);
 
 			return Result<GetCommentDto>.Success(commentDto);
 		}
@@ -54,15 +49,7 @@ namespace ArticleManagementAPI.Services
 			if (comment == null)
 				return Result<GetCommentDto>.Failure(ErrorType.NotFound, "Comment not found");
 
-			var commentDto = new GetCommentDto
-			{
-				Id = comment.Id,
-				Content = comment.Content,
-				CreatedAt = comment.CreatedAt,
-				UserId = comment.UserId,
-				UserName = comment.User.Name,
-				ArticleId = comment.ArticleId
-			};
+			var commentDto = _mapper.Map<GetCommentDto>(comment);
 
 			return Result<GetCommentDto>.Success(commentDto);
 		}
@@ -85,15 +72,8 @@ namespace ArticleManagementAPI.Services
 			query = ApplyPagination(query, dto);
 
 			var items = await query
-				.Select(comment => new GetCommentDto
-				{
-					Id = comment.Id,
-					Content = comment.Content,
-					CreatedAt = comment.CreatedAt,
-					UserId = comment.UserId,
-					UserName = comment.User.Name,
-					ArticleId = comment.ArticleId
-				}).ToListAsync();
+				.Select(comment => _mapper.Map<GetCommentDto>(comment))
+				.ToListAsync();
 
 			var pagedResult = new PagedResultDto<GetCommentDto>
 			{

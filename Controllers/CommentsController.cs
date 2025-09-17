@@ -48,7 +48,7 @@ namespace ArticleManagementAPI.Controllers
 		[HttpGet("/api/articles/{articleId}/comments")]
 		public async Task<IActionResult> GetCommentsByArticleId([FromRoute] int articleId, [FromQuery] CommentFilterDto dto)
 		{
-			var result = await _commentService.GetComments(null, articleId, dto);
+			var result = await _commentService.GetCommentsAsync(null, articleId, dto);
 
 			if (result.IsSuccess)
 				return Ok(result.Value);
@@ -59,7 +59,7 @@ namespace ArticleManagementAPI.Controllers
 		[HttpGet("/api/users/{userId}/comments")]
 		public async Task<IActionResult> GetCommentsByUserId([FromRoute] Guid userId, [FromQuery] CommentFilterDto dto)
 		{
-			var result = await _commentService.GetComments(userId, null, dto);
+			var result = await _commentService.GetCommentsAsync(userId, null, dto);
 
 			if (result.IsSuccess)
 				return Ok(result.Value);
