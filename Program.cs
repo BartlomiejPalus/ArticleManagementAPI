@@ -1,3 +1,5 @@
+using ArticleManagementAPI.Common;
+using ArticleManagementAPI.Common.Interfaces;
 using ArticleManagementAPI.Data;
 using ArticleManagementAPI.Middleware;
 using ArticleManagementAPI.Models;
@@ -9,6 +11,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using NLog.Web;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -40,7 +43,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddAutoMapper(typeof(Program));
+builder.Host.UseNLog();
 
+builder.Services.AddSingleton<IAppLogger, AppLogger>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
