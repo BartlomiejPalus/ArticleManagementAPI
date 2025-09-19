@@ -8,5 +8,6 @@ namespace ArticleManagementAPI.Repositories.Interfaces
 		Task<Comment?> GetByIdAsync(int id);
 		IQueryable<Comment> GetAll();
 		Task RemoveAsync(Comment comment);
+		Task SaveChangesAsync();
 	}
 }

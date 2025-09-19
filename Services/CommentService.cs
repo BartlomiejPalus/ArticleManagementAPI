@@ -96,6 +96,23 @@ namespace ArticleManagementAPI.Services
 			return query.Skip(dto.PageSize * (dto.PageNumber - 1)).Take(dto.PageSize);
 		}
 
+		public async Task<Result> UpdateCommentAsync(Guid userId, int commentId, CommentRequestDto dto)
+		{
+			var comment = await _commentRepository.GetByIdAsync(commentId);
+
+			if (comment == null)
+				return Result.Failure(ErrorType.NotFound, "Comment not found");
+
+			if (comment.UserId != userId)
+				return Result.Failure(ErrorType.Forbidden, "You can only update your own comments");
+
+			comment.Content = dto.Content;
+
+			await _commentRepository.SaveChangesAsync();
+
+			return Result.Success();
+		}
+
 		public async Task<Result> RemoveCommentAsync(Guid userId, bool isAdmin, int commentId)
 		{
 			var comment = await _commentRepository.GetByIdAsync(commentId);

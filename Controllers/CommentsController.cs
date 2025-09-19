@@ -67,6 +67,20 @@ namespace ArticleManagementAPI.Controllers
 			return result.ToErrorActionResult(this);
 		}
 
+		[HttpPut("{commentId}")]
+		[Authorize]
+		public async Task<IActionResult> UpdateComment([FromRoute] int commentId, [FromBody] CommentRequestDto dto)
+		{
+			var currentUserId = User.GetUserId();
+
+			var result = await _commentService.UpdateCommentAsync(currentUserId, commentId, dto);
+
+			if (result.IsSuccess)
+				return NoContent();
+
+			return result.ToErrorActionResult(this);
+		}
+
 		[HttpDelete("{commentId}")]
 		[Authorize]
 		public async Task<IActionResult> RemoveComment([FromRoute] int commentId)

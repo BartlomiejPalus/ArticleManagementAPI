@@ -39,5 +39,10 @@ namespace ArticleManagementAPI.Repositories
 			_context.Comments.Remove(comment);
 			await _context.SaveChangesAsync();
 		}
+
+		public async Task SaveChangesAsync()
+		{
+			await _context.SaveChangesAsync();
+		}
 	}
 }
