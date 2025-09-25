@@ -16,7 +16,7 @@ namespace ArticleManagementAPI.Repositories
 
 		public async Task AddRefreshTokenAsync(RefreshToken refreshToken)
 		{
-			_context.RefreshTokens.Add(refreshToken);
+			await _context.RefreshTokens.AddAsync(refreshToken);
 			await _context.SaveChangesAsync();
 		}
 
