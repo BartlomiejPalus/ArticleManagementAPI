@@ -1,4 +1,5 @@
 ﻿using ArticleManagementAPI.Common;
+using ArticleManagementAPI.Common.Interfaces;
 using ArticleManagementAPI.DTOs.Article;
 using ArticleManagementAPI.DTOs.Common;
 using ArticleManagementAPI.Enums;
@@ -14,11 +15,13 @@ namespace ArticleManagementAPI.Services
 	{
 		private readonly IArticleRepository _articleRepository;
 		private readonly IMapper _mapper;
+		private readonly IAppLogger _logger;
 
-		public ArticleService(IArticleRepository articleRepository, IMapper mapper)
+		public ArticleService(IArticleRepository articleRepository, IMapper mapper, IAppLogger logger)
 		{
 			_articleRepository = articleRepository;
 			_mapper = mapper;
+			_logger = logger;
 		}
 
 		public async Task<Result<ArticleDetailsDto>> AddArticleAsync(Guid userId, ArticleRequestDto dto)
@@ -36,10 +39,15 @@ namespace ArticleManagementAPI.Services
 
 			await _articleRepository.AddAsync(article);
 
+			_logger.Info($"User {userId} is adding new article: {article.Id}");
+
 			var newArticle = await _articleRepository.GetByIdAsync(article.Id);
 
 			if (newArticle == null)
+			{
+				_logger.Error($"Failed to retrieve newly added article. ArticleId: {article.Id}");
 				return Result<ArticleDetailsDto>.Failure(ErrorType.NotFound, "Failed to retrieve added article");
+			}
 
 			var articleDetailsDto = _mapper.Map<ArticleDetailsDto>(newArticle);
 
@@ -157,7 +165,11 @@ namespace ArticleManagementAPI.Services
 				return Result.Failure(ErrorType.NotFound, "Article not found");
 
 			if (article.IsPublished == dto.IsPublished)
+			{
+				_logger.Warn($"Visibility update conflict for ArticleId: {article.Id}." +
+					$" Current: {article.IsPublished}, Request: {dto.IsPublished}");
 				return Result.Failure(ErrorType.Conflict, "Article already has this visibility status");
+			}
 
 			article.IsPublished = dto.IsPublished;
 
@@ -174,7 +186,10 @@ namespace ArticleManagementAPI.Services
 				return Result.Failure(ErrorType.NotFound, "Article not found");
 
 			if (article.UserId != userId)
+			{
+				_logger.Warn($"Unauthorized update attempt. UserId: {userId}, ArticleId: {id}, OwnerId: {article.UserId}");
 				return Result.Failure(ErrorType.Forbidden, "You can only update your own articles");
+			}
 
 			article.Title = dto.Title;
 			article.Content = dto.Content;
@@ -195,7 +210,10 @@ namespace ArticleManagementAPI.Services
 				return Result.Failure(ErrorType.NotFound, "Article not found");
 
 			if (!isAdmin && article.UserId != userId)
+			{
+				_logger.Warn($"Unauthorized delete attempt. UserId: {userId}, ArticleId: {id}, OwnerId: {article.UserId}");
 				return Result.Failure(ErrorType.Forbidden, "You can only delete your own articles");
+			}
 
 			await _articleRepository.RemoveAsync(article);
 
