@@ -1,4 +1,6 @@
-﻿using System;
+﻿using ArticleManagement.Desktop.Controls;
+using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -12,39 +14,12 @@ namespace ArticleManagement.Desktop.Forms
 {
 	public partial class LoginForm : Form
 	{
-		public LoginForm()
+		public LoginForm(LoginControl loginControl)
 		{
 			InitializeComponent();
-		}
 
-		private void LoginForm_Load(object sender, EventArgs e)
-		{
-
-		}
-
-		private void label1_Click(object sender, EventArgs e)
-		{
-
-		}
-
-		private void button1_Click(object sender, EventArgs e)
-		{
-
-		}
-
-		private void loginButton_Click(object sender, EventArgs e)
-		{
-
-		}
-
-		private void emailText_Click(object sender, EventArgs e)
-		{
-
-		}
-
-		private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-		{
-
+			loginControl.Dock = DockStyle.Fill;
+			Controls.Add(loginControl);
 		}
 	}
 }

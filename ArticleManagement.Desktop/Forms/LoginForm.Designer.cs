@@ -28,35 +28,22 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			loginControl1 = new ArticleManagement.Desktop.Controls.LoginControl();
 			SuspendLayout();
-			// 
-			// loginControl1
-			// 
-			loginControl1.Dock = DockStyle.Fill;
-			loginControl1.Location = new Point(0, 0);
-			loginControl1.Name = "loginControl1";
-			loginControl1.Size = new Size(484, 311);
-			loginControl1.TabIndex = 0;
 			// 
 			// LoginForm
 			// 
 			AutoScaleDimensions = new SizeF(7F, 15F);
 			AutoScaleMode = AutoScaleMode.Font;
 			ClientSize = new Size(484, 311);
-			Controls.Add(loginControl1);
 			FormBorderStyle = FormBorderStyle.FixedDialog;
 			Margin = new Padding(3, 2, 3, 2);
 			MaximizeBox = false;
 			MinimizeBox = false;
 			Name = "LoginForm";
 			Text = "Login";
-			Load += LoginForm_Load;
 			ResumeLayout(false);
 		}
 
 		#endregion
-
-		private Controls.LoginControl loginControl1;
 	}
 }
