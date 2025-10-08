@@ -32,6 +32,8 @@ namespace ArticleManagement.Desktop
 						client.DefaultRequestHeaders.Add("Accept", "application/json");
 					});
 
+					services.AddSingleton<IUserSession, UserSession>();
+
 					services.AddScoped<LoginForm>();
 					services.AddScoped<LoginControl>();
 				})
