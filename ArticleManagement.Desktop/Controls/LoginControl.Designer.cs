@@ -48,7 +48,7 @@
 			// 
 			tableLayoutPanel2.ColumnCount = 3;
 			tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-			tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 200F));
+			tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 250F));
 			tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
 			tableLayoutPanel2.Controls.Add(loginLabel, 1, 0);
 			tableLayoutPanel2.Controls.Add(emailPanel, 1, 1);
@@ -83,12 +83,12 @@
 			// 
 			// emailPanel
 			// 
+			emailPanel.Anchor = AnchorStyles.None;
 			emailPanel.Controls.Add(emailTextBox);
 			emailPanel.Controls.Add(emailLabel);
-			emailPanel.Dock = DockStyle.Fill;
-			emailPanel.Location = new Point(128, 83);
+			emailPanel.Location = new Point(125, 83);
 			emailPanel.Name = "emailPanel";
-			emailPanel.Size = new Size(194, 97);
+			emailPanel.Size = new Size(200, 97);
 			emailPanel.TabIndex = 8;
 			// 
 			// emailTextBox
@@ -98,7 +98,7 @@
 			emailTextBox.Location = new Point(0, 21);
 			emailTextBox.Margin = new Padding(3, 2, 3, 2);
 			emailTextBox.Name = "emailTextBox";
-			emailTextBox.Size = new Size(194, 29);
+			emailTextBox.Size = new Size(200, 29);
 			emailTextBox.TabIndex = 2;
 			// 
 			// emailLabel
@@ -114,12 +114,12 @@
 			// 
 			// passwordPanel
 			// 
+			passwordPanel.Anchor = AnchorStyles.None;
 			passwordPanel.Controls.Add(passwordTextBox);
 			passwordPanel.Controls.Add(passwordLabel);
-			passwordPanel.Dock = DockStyle.Fill;
-			passwordPanel.Location = new Point(128, 186);
+			passwordPanel.Location = new Point(125, 186);
 			passwordPanel.Name = "passwordPanel";
-			passwordPanel.Size = new Size(194, 97);
+			passwordPanel.Size = new Size(200, 97);
 			passwordPanel.TabIndex = 8;
 			// 
 			// passwordTextBox
@@ -130,7 +130,7 @@
 			passwordTextBox.Margin = new Padding(3, 2, 3, 2);
 			passwordTextBox.Name = "passwordTextBox";
 			passwordTextBox.PasswordChar = '●';
-			passwordTextBox.Size = new Size(194, 29);
+			passwordTextBox.Size = new Size(200, 29);
 			passwordTextBox.TabIndex = 5;
 			// 
 			// passwordLabel
@@ -150,11 +150,10 @@
 			errorLabel.AutoSize = true;
 			errorLabel.Font = new Font("Segoe UI", 10F);
 			errorLabel.ForeColor = Color.Red;
-			errorLabel.Location = new Point(205, 286);
+			errorLabel.Location = new Point(225, 286);
 			errorLabel.Name = "errorLabel";
-			errorLabel.Size = new Size(39, 19);
+			errorLabel.Size = new Size(0, 19);
 			errorLabel.TabIndex = 9;
-			errorLabel.Text = "error";
 			// 
 			// loginButton
 			// 

@@ -23,23 +23,40 @@ namespace ArticleManagement.Desktop.Controls
 
 		private async void loginButton_Click(object sender, EventArgs e)
 		{
-			string email = emailTextBox.Text;
-			string password = passwordTextBox.Text;
+			string email = emailTextBox.Text.Trim();
+			string password = passwordTextBox.Text.Trim();
+
+			errorLabel.Text = string.Empty;
 
 			if (string.IsNullOrEmpty(email))
 			{
+				emailTextBox.Focus();
 				errorLabel.Text = "You must enter an e-mail";
 				return;
 			}
 			if (string.IsNullOrEmpty(password))
 			{
+				passwordTextBox.Focus();
 				errorLabel.Text = "You must enter a password";
 				return;
 			}
 
+			loginButton.Enabled = false;
+			Cursor = Cursors.WaitCursor;
+
 			var result = await _authService.LoginAsync(email, password);
 
-			errorLabel.Text = result;
+			if (result.IsSuccess)
+			{
+				this.FindForm()?.Close();
+			}
+			else
+			{
+				errorLabel.Text = result.ErrorMessage;
+			}
+
+			Cursor = Cursors.Default;
+			loginButton.Enabled = true;
 		}
 	}
 }
